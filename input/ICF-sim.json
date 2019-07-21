@@ -1,0 +1,71 @@
+{
+
+  "network": {
+    "adjacency": [
+      [
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+        1
+      ]
+    ]
+  },
+
+
+
+  "simulation": {
+    "total_steps": 1000
+  },
+
+
+  "target": {
+
+    "constraints": {
+      "x_initial": [
+        20,
+        0
+      ]
+    },
+
+    "state": {
+      "motion": {
+        "type": "circular",
+        "parameter": 200.0
+      }
+    },
+
+    "noise": {},
+    "state_space": {
+    	"ss_A": [],
+    	"ss_B": [[1,0],[0,1]]
+  }}
+}
