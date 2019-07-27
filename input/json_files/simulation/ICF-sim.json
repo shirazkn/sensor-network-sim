@@ -1,5 +1,5 @@
 {
-
+  "scheme": "KCF-BWG",
   "network": {
     "adjacency": [
       [
@@ -57,15 +57,14 @@
     },
 
     "state": {
+      "ss_A": [],
+      "ss_B": [[1,0],[0,1]],
       "motion": {
         "type": "circular",
         "parameter": 200.0
       }
     },
 
-    "noise": {},
-    "state_space": {
-    	"ss_A": [],
-    	"ss_B": [[1,0],[0,1]]
-  }}
+    "noise": [[1,0],[0,1]]
+  }
 }
