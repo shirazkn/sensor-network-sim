@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import pi
+import logging
 
 def pre_process_target(payload):
     """
@@ -77,8 +78,8 @@ def sanity_check(data):
 
 
 def do_everything(raw_data):
-
     sanity_check(raw_data)
     pre_process_target(raw_data["target"])
     pre_process_network(raw_data)
+    logging.debug("Data ready for simulation.")
     return raw_data
