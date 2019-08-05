@@ -3,6 +3,7 @@ Random variables to describe additive white gaussian system and measurement nois
 """
 from scipy import stats
 
+
 class Noise:
     """
     Class to handle sensor and measurement noises

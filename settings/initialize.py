@@ -2,6 +2,7 @@ import numpy as np
 from numpy import pi
 import logging
 
+
 def pre_process_target(payload):
     """
     Populate state_space matrices
@@ -10,19 +11,23 @@ def pre_process_target(payload):
     """
 
     ss_B = np.array(payload["state"]["ss_B"])
-    payload["state"]["ss_B"]= ss_B
+    payload["state"]["ss_B"] = ss_B
     payload["state"]["dimension"] = ss_B.shape[0]
 
     if not payload["state"].get("ss_A"):
         if payload["state"]["motion"]["type"] == "circular":
             speed = payload["state"]["motion"]["parameter"] or 200
 
-            ss_A = [[np.cos(pi/speed), -np.sin(pi/speed)],[np.sin(pi/speed), np.cos(pi/speed)]]
+            ss_A = [
+                [np.cos(pi / speed), -np.sin(pi / speed)],
+                [np.sin(pi / speed), np.cos(pi / speed)],
+            ]
             ss_A = np.array(ss_A)
-            payload["state"]["ss_A"]= np.array(ss_A)
+            payload["state"]["ss_A"] = np.array(ss_A)
             del payload["state"]["motion"]
 
     return
+
 
 def pre_process_network(payload):
     network = payload["network"]
@@ -53,7 +58,6 @@ def pre_process_matrices(length_matrices, matrix_data):
         matrices[int(key)] = _matrix
 
     return matrices
-
 
 
 def sanity_check(data):

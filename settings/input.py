@@ -1,6 +1,7 @@
 import json
 import logging
 
+
 def read_configs(filenames):
     data = {}
     for filename in filenames:
