@@ -9,6 +9,7 @@ class Network:
     """
     To make the sensor network indexing easier (without having to deal with the mutability of a list)
     """
+
     def __init__(self):
         """
         Makes a dict where key is the sensor ID and value is the sensor dict
@@ -37,15 +38,24 @@ class Network:
         Make all sensors in the network
         :param data: input_data["network"]
         """
+        adjacency_matrix = data["adjacency"]
         obs_matrices = data["observability"]
         cov_matrices = data["noise"]
+
+        # Using uniquely 'named' sensor objects instead of relying in list indices
         sensor_IDs = range(1, data["n_sensors"] + 1)
-        for index, id in enumerate(sensor_IDs):
+        # assert len(sensor_IDs) == len(set(sensor_IDs))
+
+        for index in range(data["n_sensors"]):
             obs_matrix = obs_matrices[index]
             cov_matrix = cov_matrices[index]
-            self.add_sensor(id, obs_matrix, cov_matrix)
 
-    def add_sensor(self, id, obs_matrix, cov_matrix):
+            neighbor_indices = _get_neighbor_indices(index, adjacency_matrix[index][:])
+            neighbors = [sensor_IDs[_i] for _i in neighbor_indices]
+
+            self.add_sensor(id, neighbors, obs_matrix, cov_matrix)
+
+    def add_sensor(self, id, neighbors, obs_matrix, cov_matrix):
         """
         :param id: Sensor ID (unique)
         :param H_matrix: numpy nd array, Observability matrix
@@ -61,3 +71,11 @@ class Network:
         """
         for sensor in self.sensors.values():
             sensor.make_measurement(target_x)
+
+
+def _get_neighbor_indices(self_index, adjacency_row):
+    return [
+        index
+        for index, value in enumerate(adjacency_row)
+        if value and index != self_index
+    ]
