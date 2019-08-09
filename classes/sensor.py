@@ -30,6 +30,6 @@ class Sensor:
         self.z = (self.H @ target_x) + self.v.sample()
 
 
-class KCF_Sensor(Sensor):
+class Sensor_KCF(Sensor):
     def calculate_gains(self):
         raise NotImplementedError

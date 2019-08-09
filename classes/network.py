@@ -43,26 +43,26 @@ class Network:
         cov_matrices = data["noise"]
 
         # Using uniquely 'named' sensor objects instead of relying in list indices
-        sensor_IDs = range(1, data["n_sensors"] + 1)
+        sensor_ids = range(1, data["n_sensors"] + 1)
         # assert len(sensor_IDs) == len(set(sensor_IDs))
 
         for index in range(data["n_sensors"]):
+            id = sensor_ids[index]
+            neighbor_indices = _get_neighbor_indices(index, adjacency_matrix[index][:])
+            neighbors = [sensor_ids[_i] for _i in neighbor_indices]
             obs_matrix = obs_matrices[index]
             cov_matrix = cov_matrices[index]
-
-            neighbor_indices = _get_neighbor_indices(index, adjacency_matrix[index][:])
-            neighbors = [sensor_IDs[_i] for _i in neighbor_indices]
-
             self.add_sensor(id, neighbors, obs_matrix, cov_matrix)
 
     def add_sensor(self, id, neighbors, obs_matrix, cov_matrix):
         """
         :param id: Sensor ID (unique)
-        :param H_matrix: numpy nd array, Observability matrix
-        :param R_matrix: numpy nd array, Noise co-variance
+        :param neighbors: IDs of neighboring sensors
+        :param obs_matrix: numpy nd array, Observability matrix
+        :param cov_matrix: numpy nd array, Noise co-variance
         """
         assert str(id) not in self.sensors, "Duplicate sensor ID!"
-        sensor_object = classes.sensor.Sensor(id, obs_matrix, cov_matrix)
+        sensor_object = classes.sensor.Sensor(id, neighbors, obs_matrix, cov_matrix)
         self.sensors[str(id)] = sensor_object
 
     def make_measurements(self, target_x):
