@@ -1,6 +1,13 @@
+/*
+    Simulation config. template
+    Comments like these will be stripped before loading JSON.
+*/
 {
   "scheme": "KCF-BWG",
+
   "network": {
+
+    // ------- ADJACENCY MATRIX ------------------------------- //
     "adjacency": [
       [
         1,
@@ -41,11 +48,14 @@
   },
 
 
+  // ------- SIMULATION DETAILS ------------------------------- //
 
   "simulation": {
     "total_steps": 1000
   },
 
+
+  // ------- TARGET DETAILS ----------------------------------- //
 
   "target": {
 

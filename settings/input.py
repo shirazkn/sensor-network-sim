@@ -1,5 +1,6 @@
 import json
 import logging
+from json_minify import json_minify
 
 
 def read_configs(filenames):
@@ -7,5 +8,6 @@ def read_configs(filenames):
     for filename in filenames:
         logging.debug("Reading the file %s...", filename)
         with open(filename, "r") as file:
-            data.update(json.load(file))
+            raw_data = json_minify(file.read())
+            data.update(json.loads(raw_data))
     return data

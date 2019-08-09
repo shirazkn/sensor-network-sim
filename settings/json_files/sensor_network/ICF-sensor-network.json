@@ -1,5 +1,8 @@
 {
+	// ------- OBSERVATION MATRICES ------------------------------- //
 	"observation_matrices": {
+
+		// --- This is the default obs matrix for all sensors (except patched ones)
 		"default_matrix": [
 			[
 				1,
@@ -10,6 +13,8 @@
 				1
 			]
 		],
+
+		// --- Any special requests for observation matrices go here. Will be 'patched' into the corresponding sensor
 		"other": {
 			"3": [
 				[
@@ -23,6 +28,7 @@
 			]
 		}
 	},
+	// ------- NOISE COVARIANCES ------------------------------- //
 		"noise_covariances": {
 		"default_matrix": [
 			[
