@@ -3,7 +3,7 @@ Sensor / drone class.
 Handles information receiving/sending/processing and estimate propagation.
 """
 import numpy as np
-import classes.noise
+import sim.noise
 from sim.helpers import column
 
 
@@ -20,7 +20,7 @@ class Sensor:
         self.z: np.ndarray = column(np.ndarray([0, 0]))
         self.x_hat: np.ndarray = column(np.array([0, 0]))
         self.x_bar: np.ndarray = column(np.array([0, 0]))
-        self.v = classes.noise.Noise(self.R)
+        self.v = sim.noise.Noise(self.R)
 
     def make_measurement(self, target_x: np.ndarray):
         """

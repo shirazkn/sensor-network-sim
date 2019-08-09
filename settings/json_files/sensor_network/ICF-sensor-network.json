@@ -15,6 +15,7 @@
 		],
 
 		// --- Any special requests for observation matrices go here. Will be 'patched' into the corresponding sensor
+		// (Python indexing, starts from 0)
 		"other": {
 			"3": [
 				[
@@ -28,8 +29,11 @@
 			]
 		}
 	},
+
+
 	// ------- NOISE COVARIANCES ------------------------------- //
 		"noise_covariances": {
+		// --- This is the default noise covariance for all sensors (except patched ones)
 		"default_matrix": [
 			[
 				1,
@@ -40,6 +44,8 @@
 				1
 			]
 		],
+		// --- Any special requests for noise covariance matrices go here. Will be 'patched' into the corresponding sensor
+		// (Python indexing, starts from 0)
 		"other": {
 			"3": [
 				[

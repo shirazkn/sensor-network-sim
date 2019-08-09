@@ -26,7 +26,7 @@ To edit the simulation parameters and target/sensor characteristics, edit the js
 
 To develop your own estimation algorithm, add a class such as,
 ```
-class My_New_Sensor(classes.sensor.Sensor):
+class My_New_Sensor(sim.sensor.Sensor):
     @classmethod
     def do_estimate():
         ...

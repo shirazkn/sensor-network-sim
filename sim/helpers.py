@@ -1,5 +1,5 @@
 """
-Some helper functions to handle the math/methods involved in the classes
+Some helper functions to handle the math/methods involved in the sim
 """
 
 
