@@ -1,3 +1,4 @@
-configparser
 numpy
 wxpython
+jupyter
+JSON-minify
