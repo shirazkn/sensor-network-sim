@@ -37,7 +37,6 @@ class Network:
     def get_sensors(self) -> Dict[str, sim.sensor.Sensor]:
         """
         Not sure if this method is needed. I intend to do bulk operations on sensors via the network object
-        :param index: int or str
         """
         return self.sensors
 
@@ -73,7 +72,7 @@ class Network:
         :param cov_matrix: numpy nd array, Noise co-variance
         """
         assert str(id) not in self.sensors, "Duplicate sensor ID!"
-        sensor_object = sim.sensor.Sensor_KCF(id, neighbors, obs_matrix, cov_matrix)
+        sensor_object = sim.sensor.Sensor_Template(id, neighbors, obs_matrix, cov_matrix)
         self.sensors[str(id)] = sensor_object
 
     def make_measurements(self, target_x):
