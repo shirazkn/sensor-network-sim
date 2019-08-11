@@ -11,7 +11,8 @@ Also allows for easy extension into real sensor network limitations such as pack
 #### Here are the instructions to...
 ### Install :
 Requires Python 3.5+
-Install requirements using
+
+Install requirements using,
 ```
 pip3 install -r requirements.txt
 ```
@@ -33,5 +34,5 @@ class My_New_Sensor(sim.sensor.Sensor):
 
     @classmethod
     def do_propagate():
-        ...3
+        ...
 ```
