@@ -5,12 +5,10 @@
 		// --- This is the default obs matrix for all sensors (except patched ones)
 		"default_matrix": [
 			[
-				1,
-				0
+				1, 0
 			],
 			[
-				0,
-				1
+				0, 1
 			]
 		],
 
@@ -19,12 +17,10 @@
 		"other": {
 			"3": [
 				[
-					0.5,
-					0
+					0.5, 0
 				],
 				[
-					0,
-					1.1
+					0, 1.1
 				]
 			]
 		}
@@ -36,12 +32,10 @@
 		// --- This is the default noise covariance for all sensors (except patched ones)
 		"default_matrix": [
 			[
-				1,
-				0
+				1, 0
 			],
 			[
-				0,
-				1
+				0, 1
 			]
 		],
 		// --- Any special requests for noise covariance matrices go here. Will be 'patched' into the corresponding sensor
@@ -49,12 +43,10 @@
 		"other": {
 			"3": [
 				[
-					4,
-					0
+					4, 0
 				],
 				[
-					0,
-					4
+					0, 4
 				]
 			]
 		}
