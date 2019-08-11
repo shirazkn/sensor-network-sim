@@ -19,10 +19,16 @@ class Target:
     def __init__(self, target_data):
         self.A = np.array(target_data["state"]["ss_A"])
         self.B = np.array(target_data["state"]["ss_B"])
-        self.Q = np.array(target_data["noise"])
+        self.NoiseCov = np.array(target_data["noise"])
 
         self.x = column(np.array(target_data["constraints"]["x_initial"]))
-        self.w = sim.noise.Noise(self.Q)
+        self.noise = sim.noise.Noise(self.NoiseCov)
 
     def update(self):
-        self.x = (self.A @ self.x) + (self.B @ self.w.sample())
+        self.x = (self.A @ self.x) + (self.B @ self.noise.sample())
+
+    def __getitem__(self, key):
+        """
+        Used for fetching any information required from the Target (such as A matrix)
+        """
+        return self.__dict__[key]
