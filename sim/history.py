@@ -1,6 +1,7 @@
 """
 Class object stores simulation results (as time series data)
 """
+import logging
 import matplotlib.pyplot as plt
 import sim.network
 
@@ -17,26 +18,41 @@ class History:
         """
         Currently only designing for 2D (to keep this project within scope)
         """
-        self.target_x = {"0": [], "1": []}
+
+        # 'History of target x_0, x_1'
+        self.target = {"x_0": [], "x_1": []}
+
+        # 'History of sensors[ID] quantities'
+        self.sensors = {}
         sensor_IDs = network.get_sensors().keys()
-        self.sensor_estimates = {}
         for ID in sensor_IDs:
-            self.sensor_estimates[ID] = {"x_1": [], "x_2": []}
+            self.sensors[ID] = {"x_0": [], "x_1": []}
 
-    def add(self, target_x=None, estimates=None):
-        if target_x is not None:
-            self.target_x["0"].append(target_x[0])
-            self.target_x["1"].append(target_x[1])
+    def add(self, target_x=None, estimates_of_sensors=None, cross_covs_of_sensors=None):
+        if target_x:
+            self.target["x_0"].append(target_x[0])
+            self.target["x_1"].append(target_x[1])
+            logging.debug(f"Added target_x to history.")
 
-        # Note : Might have to split this into prior and post
-        if estimates:
-            raise NotImplementedError
+        if estimates_of_sensors:
+            for sensor_ID, estimate in estimates_of_sensors:
+                self.sensors[sensor_ID]["x_0"].append(estimate[0])
+                self.sensors[sensor_ID]["x_1"].append(estimate[1])
+            logging.debug(f"Added sensor estimates to history.")
 
-    def plot_xy(self, target=True, estimates=True):
+        if cross_covs_of_sensors:
+            for sensor_ID, cross_cov in cross_covs_of_sensors:
+                self.sensors[sensor_ID]["cross_cov"].append(cross_cov)
+            logging.debug(f"Added sensor cross_covariances to history.")
+
+    def plot_xy(self, target=True, estimates_of_sensors=[]):
         if target:
-            plt.plot(self.target_x["0"], self.target_x["1"])
+            plt.plot(self.target_x["x_0"], self.target_x["x_1"])
+            print(f"Plotted history of target coordinates.")
 
-        if estimates:
-            raise NotImplementedError
+        for sensor_ID in estimates_of_sensors:
+            plt.plot(self.sensors[sensor_ID]["x_0"], self.sensors[sensor_ID]["x_1"])
+            print(f"Plotted history of sensor estimates {sensor_ID}.")
 
+        print("Showing plot...")
         plt.show()
