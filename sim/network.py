@@ -4,6 +4,7 @@ Function to deal with sensor creation, update etc
 import sim.sensor
 import sim.messages
 import sim.estimators.template
+import sim.estimators.KCF_2007
 
 from typing import Dict
 
@@ -32,10 +33,12 @@ class Network:
         """
 
         self.SensorClass = sim.estimators.template.EstimatorTemp
+        self.sensor_params = {}
 
-        # if estimation_scheme == "ICF":
-        #     self.SensorClass = sim.estimators.ICF.EstimatorICF
-        #
+        if estimation_scheme == "KCF":
+            self.SensorClass = sim.estimators.KCF_2007.EstimatorKCF
+            self.sensor_params = {"epsilon": 0.25}
+
         # elif estimation_scheme == "KCF":
         #     self.SensorClass = sim.estimators.KCF.EstimatorKCF
 
@@ -83,17 +86,19 @@ class Network:
             neighbors = [sensor_ids[_i] for _i in neighbor_indices]
             obs_matrix = obs_matrices[index]
             cov_matrix = cov_matrices[index]
-            self.add_sensor(id, neighbors, obs_matrix, cov_matrix)
+            self.add_sensor(id, neighbors, obs_matrix, cov_matrix, **self.sensor_params)
 
-    def add_sensor(self, id, neighbors, obs_matrix, cov_matrix):
+    def add_sensor(self, id, neighbors, obs_matrix, noise_cov_matrix, **kwargs):
         """
         :param id: Sensor ID (unique)
         :param neighbors: IDs of neighboring sensors
         :param obs_matrix: numpy nd array, Observability matrix
-        :param cov_matrix: numpy nd array, Noise co-variance
+        :param noise_cov_matrix: numpy nd array, Noise co-variance
         """
         assert str(id) not in self.sensors, "Duplicate sensor ID!"
-        sensor_object = self.SensorClass(id, neighbors, obs_matrix, cov_matrix)
+
+        # (Note : Must use keyword args here...)
+        sensor_object = self.SensorClass(sensor_id=id, neighbors=neighbors, obs_matrix=obs_matrix, noise_cov_matrix=noise_cov_matrix, **kwargs)
         self.sensors[str(id)] = sensor_object
 
     def make_measurements(self, target_x):

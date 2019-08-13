@@ -32,10 +32,10 @@
 		// --- This is the default noise covariance for all sensors (except patched ones)
 		"default_matrix": [
 			[
-				1, 0
+				2, 0
 			],
 			[
-				0, 1
+				0, 2
 			]
 		],
 		// --- Any special requests for noise covariance matrices go here. Will be 'patched' into the corresponding sensor

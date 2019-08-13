@@ -29,14 +29,14 @@ class Sensor:
         self.Obs: np.array = obs_matrix
         self.NoiseCov: np.array = noise_cov_matrix
 
-        self.measurement: np.array = column(np.array([0, 0]))
+        self.measurement: np.array = column(np.array([None, None]))
         self.noise = sim.noise.Noise(self.NoiseCov)
 
         # Matrices and Vectors corresponding to estimation
-        self.estimate: np.array = column(np.array([0, 0]))
+        self.estimate: np.array = column(np.array([None, None]))
         self.ErrCov: np.array = np.array([
-            [0, 0],
-            [0, 0]]
+            [None, None],
+            [None, None]]
         )
 
     def __getitem__(self, key):

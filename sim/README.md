@@ -22,6 +22,8 @@ When 22 has an updated message for everyone, it patches the new information into
 
 #### To Do (Maybe):
 Instead of sticking to 2D estimation, create template objects for dimensions and reuse them. For eg. store column([0,0]) object and invoke that wherever you need a 2D vector.
+Add helper functions such as make_nxm_matrix(n, m, type="identity") (type can be zeros or none)
+type=none is to enforce that we aren't unknowingly initializing anything
 
 Make message update asynchronus using async coroutines
 

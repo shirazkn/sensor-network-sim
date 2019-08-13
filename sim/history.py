@@ -47,11 +47,11 @@ class History:
 
     def plot_xy(self, target=True, estimates_of_sensors=[]):
         if target:
-            plt.plot(self.target["x_0"], self.target["x_1"], 'bo')
+            plt.plot(self.target["x_0"], self.target["x_1"], 'b-')
             print(f"Plotted history of target coordinates.")
 
         for sensor_ID in estimates_of_sensors:
-            plt.plot(self.sensors[sensor_ID]["x_0"], self.sensors[sensor_ID]["x_1"], 'r+')
+            plt.plot(self.sensors[sensor_ID]["x_0"], self.sensors[sensor_ID]["x_1"], 'r-')
             print(f"Plotted history of sensor estimates {sensor_ID}.")
 
         print("Showing plot...")
