@@ -3,29 +3,6 @@
     Comments like these will be stripped before loading JSON.
 */
 {
-  "scheme": "ICF",
-
-  "network": {
-
-    // ------- ADJACENCY MATRIX ------------------------------- //
-    "adjacency": [
-      [
-        1, 0, 1, 1, 0
-      ],
-      [
-        0, 1, 1, 0, 1
-      ],
-      [
-        1, 1, 1, 1, 1
-      ],
-      [
-        1, 0, 1, 1, 0
-      ],
-      [
-        0, 1, 1, 0, 1
-      ]
-    ]
-  },
 
 
   // ------- SIMULATION DETAILS ------------------------------- //

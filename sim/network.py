@@ -22,6 +22,15 @@ def create(input_data):
     return network
 
 
+def get_sensor_ids(data):
+    data["indexing_style"] = data.get("indexing_style", "python")
+
+    if data["indexing_style"] == "matlab":
+        return [str(_id) for _id in range(1, data["n_sensors"] + 1)]
+    elif data["indexing_style"] == "python":
+        return [str(_id) for _id in range(data["n_sensors"])]
+
+
 class Network:
     """
     To make the sensor network indexing easier (without having to deal with the mutability of a list)
@@ -36,6 +45,7 @@ class Network:
         self.sensor_params = {}
 
         if estimation_scheme == "KCF":
+
             self.SensorClass = sim.estimators.KCF_2007.EstimatorKCF
             self.sensor_params = {"epsilon": 0.25}
 
@@ -75,18 +85,16 @@ class Network:
         obs_matrices = data["observability"]
         cov_matrices = data["noise"]
 
-        # Using uniquely 'named' sensor objects instead of relying in list indices
-        sensor_ids = [str(_id) for _id in range(1, data["n_sensors"] + 1)]
-
-        # assert len(sensor_IDs) == len(set(sensor_IDs))
+        # Using uniquely 'named' sensor objects instead of relying on list indices
+        sensor_ids = get_sensor_ids(data)
 
         for index in range(data["n_sensors"]):
-            id = sensor_ids[index]
+            _id = sensor_ids[index]
             neighbor_indices = _get_neighbor_indices(index, adjacency_matrix[index][:])
             neighbors = [sensor_ids[_i] for _i in neighbor_indices]
-            obs_matrix = obs_matrices[index]
-            cov_matrix = cov_matrices[index]
-            self.add_sensor(id, neighbors, obs_matrix, cov_matrix, **self.sensor_params)
+            obs_matrix = obs_matrices[_id]
+            cov_matrix = cov_matrices[_id]
+            self.add_sensor(_id, neighbors, obs_matrix, cov_matrix, **self.sensor_params)
 
     def add_sensor(self, id, neighbors, obs_matrix, noise_cov_matrix, **kwargs):
         """

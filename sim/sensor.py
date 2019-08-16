@@ -26,8 +26,8 @@ class Sensor:
         self.neighbors: List[str] = neighbors
 
         # Matrices & Vectors corresponding to measurement
-        self.Obs: np.array = obs_matrix
-        self.NoiseCov: np.array = noise_cov_matrix
+        self.Obs: np.array = np.array(obs_matrix)
+        self.NoiseCov: np.array = np.array(noise_cov_matrix)
 
         self.measurement: np.array = column(np.array([None, None]))
         self.noise = sim.noise.Noise(self.NoiseCov)

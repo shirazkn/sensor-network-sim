@@ -24,17 +24,17 @@ class EstimatorKCF(sim.sensor.Sensor):
     # If you need an init function, you must also call super().__init__ like this
     def __init__(self, epsilon, **kwargs):
 
-        self.estimate_prior = column(np.array([0, 0]))
-        self.ErrCov_prior = column(np.array(
-            [[0, 0],
-             [0, 0]]
-        ))
+        super().__init__(**kwargs)
+        self.estimate_prior = column(np.array([20, 0]))
+        self.ErrCov_prior = np.array(
+            [[1.0, 0.0],
+             [0.0, 1.0]]
+        )
         self.K_gain = None
         self.C_gain = {_id: None for _id in self.neighbors}
 
         # Epsilon
         self.eps = epsilon
-        super().__init__(**kwargs)
 
     def do_estimation(self, target_info: dict, neighbor_info: Dict[str, dict]):
         """
@@ -42,6 +42,7 @@ class EstimatorKCF(sim.sensor.Sensor):
         :param neighbor_info: {"sensor_ID": _dict }, for sensor_ID in cls.neighbors
                _dict = {key: value} for key in INFO_NEEDED_FROM_NEIGHBORS
         """
+        # import pdb; pdb.set_trace()
 
         # See KCF Raj (2017) for equation numbers.
 
@@ -51,7 +52,7 @@ class EstimatorKCF(sim.sensor.Sensor):
 
         # Calculate Estimate, then propagate prior quantities
         eq_7term_2 = self.K_gain @ (self.measurement - (self.Obs @ self.estimate_prior))
-        eq_7term_3 = column(np.array([0, 0]))
+        eq_7term_3 = column(np.array([0.0, 0.0]))
         for i in self.neighbors:
             eq_7term_3 += self.C_gain[i] @ (neighbor_info[i]["estimate_prior"] - self.estimate_prior)
 
@@ -60,9 +61,8 @@ class EstimatorKCF(sim.sensor.Sensor):
 
     def calc_K_gain(self):
         eq_24_brackets = self.NoiseCov + (self.Obs @ self.ErrCov_prior @ self.Obs.T)
-        eq_24_brackets_inv = eq_24_brackets.inverse()
 
-        self.K_gain = self.ErrCov_prior @ self.Obs.T @ eq_24_brackets_inv
+        self.K_gain = self.ErrCov_prior @ self.Obs.T @ la.inv(eq_24_brackets)
 
     def calc_C_gain(self):
         for i in self.neighbors:

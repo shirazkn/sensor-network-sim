@@ -1,61 +1,64 @@
 import numpy as np
 from numpy import pi
 import logging
+import sim.network
 
 
-def pre_process_target(payload):
+def pre_process_target(raw_data):
     """
     Populate state_space matrices
-    :param payload: json_dict["target"]
+    :param raw_data: json_dict["target"]
     :return: Nothing
     """
+    target_data = raw_data["target"]
+    ss_B = np.array(target_data["state"]["ss_B"])
+    target_data["state"]["ss_B"] = ss_B
+    target_data["state"]["dimension"] = ss_B.shape[0]
 
-    ss_B = np.array(payload["state"]["ss_B"])
-    payload["state"]["ss_B"] = ss_B
-    payload["state"]["dimension"] = ss_B.shape[0]
-
-    if not payload["state"].get("ss_A"):
-        if payload["state"]["motion"]["type"] == "circular":
-            speed = payload["state"]["motion"]["parameter"] or 200
+    if not target_data["state"].get("ss_A"):
+        if target_data["state"]["motion"]["type"] == "circular":
+            speed = target_data["state"]["motion"]["parameter"] or 200
 
             ss_A = [
                 [np.cos(pi / speed), -np.sin(pi / speed)],
                 [np.sin(pi / speed), np.cos(pi / speed)],
             ]
             ss_A = np.array(ss_A)
-            payload["state"]["ss_A"] = np.array(ss_A)
-            del payload["state"]["motion"]
+            target_data["state"]["ss_A"] = np.array(ss_A)
+            del target_data["state"]["motion"]
 
     return
 
 
-def pre_process_network(payload):
-    network = payload["network"]
+def pre_process_network(raw_data):
+    network = raw_data["network"]
     adj_matrix = np.array(network["adjacency"])
     network["n_sensors"] = len(adj_matrix)
 
-    obs_data = payload["observation_matrices"]
-    noise_data = payload["noise_covariances"]
-    network["observability"] = pre_process_matrices(network["n_sensors"], obs_data)
-    network["noise"] = pre_process_matrices(network["n_sensors"], noise_data)
+    obs_data = raw_data["observation_matrices"]
+    noise_data = raw_data["noise_covariances"]
 
-    del payload["observation_matrices"]
-    del payload["noise_covariances"]
+    network["observability"] = pre_process_matrices(network, obs_data)
+    network["noise"] = pre_process_matrices(network, noise_data)
+
+    del raw_data["observation_matrices"]
+    del raw_data["noise_covariances"]
     return
 
 
-def pre_process_matrices(length_matrices, matrix_data):
+def pre_process_matrices(network_data, matrix_data):
     default_matrix = matrix_data["default_matrix"]
-    matrices = []
-    for i in range(length_matrices):
-        matrices.append(default_matrix)
+    matrices = {}
+    sensor_ids = sim.network.get_sensor_ids(network_data)
+    for id in sensor_ids:
+        matrices[id] = default_matrix
 
-    if not "other" in matrix_data:
+    if "other" not in matrix_data:
         return matrices
 
     # Any non-default matrices are in 'other' key
     for key, _matrix in matrix_data["other"].items():
-        matrices[int(key)] = _matrix
+        matrices[key] = _matrix
 
     return matrices
 
@@ -83,7 +86,7 @@ def sanity_check(data):
 
 def do_everything(raw_data):
     sanity_check(raw_data)
-    pre_process_target(raw_data["target"])
+    pre_process_target(raw_data)
     pre_process_network(raw_data)
     logging.debug("Data ready for simulation.")
     return raw_data
