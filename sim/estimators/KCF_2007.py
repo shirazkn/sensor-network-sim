@@ -66,7 +66,7 @@ class EstimatorKCF(sim.sensor.Sensor):
 
     def calc_C_gain(self):
         for i in self.neighbors:
-            self.C_gain[i] = self.eps * (self.ErrCov_prior / 1 + la.norm(self.ErrCov_prior, 'fro'))
+            self.C_gain[i] = self.eps * (self.ErrCov_prior / (1 + la.norm(self.ErrCov_prior, 'fro')))
 
     def do_propagation(self, target_info):
         _F = np.identity(2) - self.K_gain @ self.Obs

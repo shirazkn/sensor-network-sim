@@ -18,7 +18,7 @@
 
     "constraints": {
       "x_initial": [
-        20, 0
+        50, 0
       ]
     },
 
@@ -30,7 +30,7 @@
       ],
       "motion": {
         "type": "circular",
-        "parameter": 200.0
+        "parameter": 2000.0
       }
     },
 

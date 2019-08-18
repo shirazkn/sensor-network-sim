@@ -45,10 +45,10 @@
 		"other": {
 			"1": [
 				[
-					100, 0
+					1, 0
 				],
 				[
-					0, 100
+					0, 1
 				]
 			]
 		}
@@ -60,28 +60,20 @@
 		// --- This is the default noise covariance for all sensors (except patched ones)
 		"default_matrix": [
 			[
-				2, 0
+				5, 0
 			],
 			[
-				0, 2
+				0, 5
 			]
 		],
 		// --- Any special requests for noise covariance matrices go here. Will be 'patched' into the corresponding sensor
 		"other": {
-			"2": [
+			"3": [
 				[
 					20, 0
 				],
 				[
 					0, 20
-				]
-			],
-			"3": [
-				[
-					0.000001, 0
-				],
-				[
-					0, 0.000001
 				]
 			]
 		}
