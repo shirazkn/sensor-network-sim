@@ -1,5 +1,12 @@
 """
-KCF estimation Scheme as presented by Olfati-Saber
+------------------------
+Kalman Consensus Filter
+Reza Olfati-Saber, 2007
+------------------------
+Notes:
+    Does not account for cross-covariances
+    Sub-optimal gains (performance depends on value of "epsilon")
+    Epsilon should be of the order of the iteration time-step
 """
 
 import logging
@@ -11,9 +18,6 @@ import numpy.linalg as la
 
 
 class EstimatorKCF(sim.sensor.Sensor):
-    """
-    An example of how an implemented sensor-estimator class could look
-    """
 
     # What information does a sensor need about the target?
     INFO_NEEDED_FROM_TARGET: List[str] = ["A", "B", "NoiseCov"]
@@ -48,7 +52,7 @@ class EstimatorKCF(sim.sensor.Sensor):
 
         # Find K and Cs
         self.calc_K_gain()
-        self.calc_C_gain()
+        self.calc_C_gains()
 
         # Calculate Estimate, then propagate prior quantities
         eq_7term_2 = self.K_gain @ (self.measurement - (self.Obs @ self.estimate_prior))
@@ -64,7 +68,7 @@ class EstimatorKCF(sim.sensor.Sensor):
 
         self.K_gain = self.ErrCov_prior @ self.Obs.T @ la.inv(eq_24_brackets)
 
-    def calc_C_gain(self):
+    def calc_C_gains(self):
         for i in self.neighbors:
             self.C_gain[i] = self.eps * (self.ErrCov_prior / (1 + la.norm(self.ErrCov_prior, 'fro')))
 

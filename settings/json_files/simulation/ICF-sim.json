@@ -18,7 +18,8 @@
 
     "constraints": {
       "x_initial": [
-        50, 0
+        // If you increase this, you might want to decrease "parameter" below
+        100, 0
       ]
     },
 
@@ -30,7 +31,8 @@
       ],
       "motion": {
         "type": "circular",
-        "parameter": 2000.0
+        // The smaller this is, the faster the target 'revolves'
+        "parameter": 400.0
       }
     },
 

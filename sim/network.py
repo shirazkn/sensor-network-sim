@@ -3,8 +3,11 @@ Function to deal with sensor creation, update etc
 """
 import sim.sensor
 import sim.messages
+
+# Add your new estimation scheme here
 import sim.estimators.template
 import sim.estimators.KCF_2007
+import sim.estimators.OptimalMVF
 
 from typing import Dict
 
@@ -44,13 +47,14 @@ class Network:
         self.SensorClass = sim.estimators.template.EstimatorTemp
         self.sensor_params = {}
 
-        if estimation_scheme == "KCF":
+        # Add your new estimation scheme here
 
+        if estimation_scheme == "KCF":
             self.SensorClass = sim.estimators.KCF_2007.EstimatorKCF
             self.sensor_params = {"epsilon": 0.25}
 
-        # elif estimation_scheme == "KCF":
-        #     self.SensorClass = sim.estimators.KCF.EstimatorKCF
+        if estimation_scheme == "OMVF":
+            self.SensorClass = sim.estimators.OptimalMVF.EstimatorOMVF
 
         self.sensors: Dict[str, sim.sensor.Sensor] = {}
 
