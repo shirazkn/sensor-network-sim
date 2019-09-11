@@ -33,9 +33,9 @@
       }
     },
 
-      "noise_covariance": [
-                [1,0],
-                [0,1]
+    "noise_covariance": [
+              [1,0],
+              [0,1]
     ]
   }
 }
