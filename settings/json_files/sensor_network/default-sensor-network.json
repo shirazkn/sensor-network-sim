@@ -1,0 +1,49 @@
+{
+
+	"scheme": "KCF",
+
+	"network": {
+
+		// --- Set this to "python" for indexing from 0 --- //
+		"indexing_style":"matlab",
+
+		// ------- ADJACENCY MATRIX ------------------------------- //
+		"adjacency": [
+		  [
+			1, 0, 1, 1, 0
+		  ],
+		  [
+			0, 1, 1, 0, 1
+		  ],
+		  [
+			1, 1, 1, 1, 1
+		  ],
+		  [
+			1, 0, 1, 1, 0
+		  ],
+		  [
+			0, 1, 1, 0, 1
+		  ]
+		],
+
+	// ------- OBSERVATION MATRICES ------------------------------- //
+		// --- This is the default obs matrix for all sensors
+		"observation_matrices":
+			[[
+				1, 0
+			],
+			[
+				0, 1
+			]]
+		,
+
+		// ------- NOISE COVARIANCES (MEASUREMENT)------------------------------- //
+		"noise_covariances":
+			[[
+				5, 0
+			],
+			[
+				0, 5
+			]]
+	}
+}

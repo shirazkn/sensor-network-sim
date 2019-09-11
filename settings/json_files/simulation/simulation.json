@@ -3,14 +3,11 @@
     Comments like these will be stripped before loading JSON.
 */
 {
-
-
   // ------- SIMULATION DETAILS ------------------------------- //
 
   "simulation": {
     "total_steps": 1000
   },
-
 
   // ------- TARGET DETAILS ----------------------------------- //
 
@@ -23,7 +20,7 @@
       ]
     },
 
-    "state": {
+    "state_space": {
       "ss_A": [],
       "ss_B": [
                 [1,0],
@@ -36,7 +33,7 @@
       }
     },
 
-      "noise": [
+      "noise_covariance": [
                 [1,0],
                 [0,1]
     ]

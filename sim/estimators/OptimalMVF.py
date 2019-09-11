@@ -104,6 +104,16 @@ class EstimatorOMVF(sim.sensor.Sensor):
             _sum += self.C_gain[j] @ (neighbor["estimate_prior"] - self.estimate_prior)
         return _sum
 
+    def add_self_to_neighbor_info(self, _neighbor_info):
+        """
+        Add own info to _neighbor_info dict (to simplify notation)
+        """
+        _neighbor_info[self.id] = {
+            _attr: self[_attr]
+            for _attr in self.INFO_NEEDED_FROM_NEIGHBORS
+        }
+        return _neighbor_info
+
 
 def get_W_matrices(_neighbor_info):
     W = {}
@@ -118,3 +128,4 @@ def get_W_matrices(_neighbor_info):
         sum_W += W[j]
 
     return W, la.inv(sum_W)
+
