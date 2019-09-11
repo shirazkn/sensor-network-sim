@@ -17,9 +17,9 @@ def create(input_data):
 
 class Target:
     def __init__(self, target_data):
-        self.A = np.array(target_data["state"]["ss_A"])
-        self.B = np.array(target_data["state"]["ss_B"])
-        self.NoiseCov = np.array(target_data["noise"])
+        self.A = np.array(target_data["state_space"]["ss_A"])
+        self.B = np.array(target_data["state_space"]["ss_B"])
+        self.NoiseCov = np.array(target_data["noise_covariance"])
 
         self.x = column(np.array(target_data["constraints"]["x_initial"]))
         self.noise = sim.noise.Noise(self.NoiseCov)

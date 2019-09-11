@@ -10,7 +10,7 @@ import sim.network
 import numpy.linalg as la
 from sim.helpers import make_dir
 
-FIGURE_SIZE = (10, 10)
+FIGURE_SIZE = (7, 7)
 
 
 def create(network):
@@ -31,7 +31,7 @@ class History:
 
         # 'History of sensors[ID] quantities'
         self.sensors = {}
-        sensor_IDs = network.get_sensors().keys()
+        sensor_IDs = network.sensors.keys()
         for ID in sensor_IDs:
             self.sensors[ID] = {"x_0": [], "x_1": [], "z_0": [], "z_1": [], "ErrCov": []}
 
@@ -85,15 +85,15 @@ class History:
         plt.show()
 
 
-def monte_carlo_avg(mc_history: sim.history.History, new_history: sim.history.History, count):
-            """
-            TODO add method to average two histories (so you can do mc_avg_history.add(sim.history.average, 1000) )
-            :return:
-            """
-            raise NotImplementedError
+# def monte_carlo_avg(mc_history: History, new_history: History, count):
+#             """
+#             TODO add method to average two histories (so you can do mc_avg_history.add(sim.history.average, 1000) )
+#             :return:
+#             """
+#             raise NotImplementedError
 
 
-def save(info: dict = None, history: sim.history.History = None, name=None, timestamp=True,
+def save(info: dict = None, history: History = None, name=None, timestamp=True,
          by_date=True, by_scheme=True):
     """
     :param info: Send the 'input_data' dict here, which is the dict created after input json file is parsed
@@ -112,7 +112,7 @@ def save(info: dict = None, history: sim.history.History = None, name=None, time
         saved_data["info"] = info
         estimation_scheme = info["scheme"]
 
-    if not isinstance(history, sim.history.History):
+    if not isinstance(history, History):
         raise ValueError
     saved_data["history"] = vars(history)
 

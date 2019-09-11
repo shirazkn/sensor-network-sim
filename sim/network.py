@@ -3,11 +3,13 @@ Function to deal with sensor creation, update etc
 """
 import sim.sensor
 import sim.messages
+import sim.errors
 
 # Add your new estimation scheme here
 import sim.estimators.template
 import sim.estimators.KCF_2007
 import sim.estimators.OptimalMVF
+import sim.estimators.ICF_2013
 
 from typing import Dict
 
@@ -53,8 +55,14 @@ class Network:
             self.SensorClass = sim.estimators.KCF_2007.EstimatorKCF
             self.sensor_params = {"epsilon": 0.25}
 
-        if estimation_scheme == "OMVF":
+        elif estimation_scheme == "OMVF":
             self.SensorClass = sim.estimators.OptimalMVF.EstimatorOMVF
+
+        elif estimation_scheme == "ICF":
+            self.SensorClass = sim.estimators.ICF_2013.EstimatorICF
+            self.sensor_params = {"epsilon": 0.25}
+        else:
+            print("Wrong estimation scheme ; No estimator selected!")
 
         self.sensors: Dict[str, sim.sensor.Sensor] = {}
 
@@ -64,30 +72,14 @@ class Network:
         # Info needed about the target
         self.target_info = {key: None for key in self.SensorClass.INFO_NEEDED_FROM_TARGET}
 
-    def get_sensor(self, index: int) -> sim.sensor.Sensor:
-        """
-        Not sure if this method is needed. I intend to do bulk operations on sensors via the network object
-        :param index: int or str
-        """
-        return self.sensors[str(index)]
-
-    def get_sensors(self) -> Dict[str, sim.sensor.Sensor]:
-        """
-        Not sure if this method is needed. I intend to do bulk operations on sensors via the network object
-        """
-        return self.sensors
-
-    def get_estimates(self):
-        raise NotImplementedError
-
     def create_sensors(self, data: dict):
         """
         Make all sensors in the network
         :param data: input_data["network"]
         """
         adjacency_matrix = data["adjacency"]
-        obs_matrices = data["observability"]
-        cov_matrices = data["noise"]
+        obs_matrices = data["observation_matrices"]
+        cov_matrices = data["noise_covariances"]
 
         # Using uniquely 'named' sensor objects instead of relying on list indices
         sensor_ids = get_sensor_ids(data)

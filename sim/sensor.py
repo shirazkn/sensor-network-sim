@@ -54,10 +54,3 @@ class Sensor:
 
     def do_estimation(self, target_info: dict, neighbor_info: Dict[str, dict]):
         raise sim.errors.InvalidSensorClass("The method do_estimation needs to be defined in inherited class.")
-
-    def add_self_to_neighbor_info(self, _neighbor_info):
-        _neighbor_info[self.id] = {
-            _attr: self[_attr]
-            for _attr in self.INFO_NEEDED_FROM_NEIGHBORS
-        }
-        return _neighbor_info

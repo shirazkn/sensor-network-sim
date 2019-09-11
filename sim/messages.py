@@ -6,7 +6,7 @@ class Messages:
         """
         List of message_dicts. Message_dict structure varies based on estimation algorithm
         """
-        sensor_ids = network.get_sensors().keys()
+        sensor_ids = network.sensors.keys()
 
         message_dict = {key: None for key in network.SensorClass.INFO_NEEDED_FROM_NEIGHBORS}
         self.all_messages: Dict[str, dict] = {sensor_id: message_dict for sensor_id in sensor_ids}
