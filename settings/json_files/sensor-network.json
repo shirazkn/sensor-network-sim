@@ -1,0 +1,40 @@
+{
+	"network": {
+		"indexing_style": "matlab",
+		"adjacency": [
+		  [
+			1, 0, 1, 1, 0
+		  ],
+		  [
+			0, 1, 1, 0, 1
+		  ],
+		  [
+			1, 1, 1, 1, 1
+		  ],
+		  [
+			1, 0, 1, 1, 0
+		  ],
+		  [
+			0, 1, 1, 0, 1
+		  ]
+		],
+		"observation_matrices":{
+			"default":
+				[[
+					1, 0
+				],
+				[
+					0, 1
+				]]
+		},
+		"noise_covariances":{
+			"default":
+				[[
+					5, 0
+				],
+				[
+					0, 5
+				]]
+		}
+	}
+}

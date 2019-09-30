@@ -1,6 +1,7 @@
 """
-Some helper functions to handle the math/methods involved in the sim
+Some helper functions to handle the math/methods
 """
+import os
 
 
 def column(vector):
@@ -16,3 +17,9 @@ def make_dir(location):
     """
     if not os.path.isdir(location):
         os.mkdir(location)
+
+
+def get_unique_ids(length):
+    # TODO
+    # Using MATLAB indexing for now
+    return [str(_id) for _id in range(1, length + 1)]

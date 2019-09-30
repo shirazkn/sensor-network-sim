@@ -5,6 +5,7 @@ Handles measurement/sensing methods, whereas inheriting class handles estimation
 import numpy as np
 import sim.noise
 import sim.errors
+import sim.estimators
 
 from sim.helpers import column
 from typing import List, Dict
@@ -21,7 +22,7 @@ class Sensor:
 
     def __init__(self, sensor_id, neighbors, obs_matrix, noise_cov_matrix):
 
-        # Topology information
+        # (Local) topology information
         self.id: str = sensor_id
         self.neighbors: List[str] = neighbors
 
@@ -39,15 +40,9 @@ class Sensor:
             [None, None]]
         )
 
-    def __getitem__(self, key):
-        """
-        Used for fetching information from neighbors
-        """
-        return self.__dict__[key]
-
     def make_measurement(self, target_x: np.array):
         """
-        Measures the target
+        Makes noisy measurement of the target
         :param target_x: Present co-ordinates of the target
         """
         self.measurement = (self.Obs @ target_x) + self.noise.sample()
@@ -55,9 +50,25 @@ class Sensor:
     def do_estimation(self, target_info: dict, neighbor_info: Dict[str, dict]):
         raise sim.errors.InvalidSensorClass("The method do_estimation needs to be defined in inherited class.")
 
-    def add_self_to_neighbor_info(self, _neighbor_info):
-        _neighbor_info[self.id] = {
-            _attr: self[_attr]
-            for _attr in self.INFO_NEEDED_FROM_NEIGHBORS
-        }
-        return _neighbor_info
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+
+def get_estimator(estimation_scheme):
+    sensor_params = {}
+
+    if estimation_scheme == "KCF":
+        SensorClass = sim.estimators.KCF_2007.EstimatorKCF
+        sensor_params = {"epsilon": 0.25}
+
+    elif estimation_scheme == "OMVF":
+        SensorClass = sim.estimators.OptimalMVF.EstimatorOMVF
+
+    elif estimation_scheme == "ICF":
+        SensorClass = sim.estimators.ICF_2013.EstimatorICF
+        sensor_params = {"epsilon": 0.25}
+    else:
+        SensorClass = sim.estimators.template.EstimatorTemp
+        print("Wrong estimation scheme ; No estimator selected!")
+
+    return SensorClass, sensor_params

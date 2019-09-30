@@ -10,14 +10,7 @@ import sim.network
 import numpy.linalg as la
 from sim.helpers import make_dir
 
-FIGURE_SIZE = (10, 10)
-
-
-def create(network):
-    """
-    Abstraction of __init__ method
-    """
-    return History(network)
+FIGURE_SIZE = (7, 7)
 
 
 class History:
@@ -31,7 +24,7 @@ class History:
 
         # 'History of sensors[ID] quantities'
         self.sensors = {}
-        sensor_IDs = network.get_sensors().keys()
+        sensor_IDs = network.sensors.keys()
         for ID in sensor_IDs:
             self.sensors[ID] = {"x_0": [], "x_1": [], "z_0": [], "z_1": [], "ErrCov": []}
 
@@ -39,7 +32,7 @@ class History:
         if target_x is not None:
             self.target["x_0"].append(target_x[0])
             self.target["x_1"].append(target_x[1])
-            logging.debug(f"Added target_x to history.")
+            logging.debug(f"Target is at {target_x}.")
 
     def add_estimates(self, network: sim.network.Network = None):
         if network:
@@ -50,7 +43,6 @@ class History:
                 self.sensors[id]["z_0"].append(sensor.measurement[0])
                 self.sensors[id]["z_1"].append(sensor.measurement[1])
                 self.sensors[id]["ErrCov"].append(sensor.ErrCov)
-            logging.debug(f"Added sensor estimates to history.")
 
     def plot_xy(self, target=True, estimates_of: str = None, measurements_of: str = None):
         plt.rcParams["figure.figsize"] = FIGURE_SIZE
@@ -61,14 +53,13 @@ class History:
         if measurements_of:
             plt.plot(self.sensors[measurements_of]["z_0"], self.sensors[measurements_of]["z_1"], 'r-',
                      label=f"Measurement of sensor {measurements_of}")
-            print(f"Plotted history of sensor estimates {measurements_of}.")
+            print(f"Plotted history of sensor {measurements_of}'s measurements.")
 
         if estimates_of:
             plt.plot(self.sensors[estimates_of]["x_0"], self.sensors[estimates_of]["x_1"], 'b-',
                      label=f"Estimate of sensor {estimates_of}")
-            print(f"Plotted history of sensor estimates {estimates_of}.")
+            print(f"Plotted history of sensor {estimates_of}'s estimates.")
 
-        print("Showing plot...")
         plt.xlabel("x")
         plt.ylabel("y")
         plt.legend(loc='lower right')
@@ -85,15 +76,11 @@ class History:
         plt.show()
 
 
-def monte_carlo_avg(mc_history: sim.history.History, new_history: sim.history.History, count):
-            """
-            TODO add method to average two histories (so you can do mc_avg_history.add(sim.history.average, 1000) )
-            :return:
-            """
-            raise NotImplementedError
+def create(network):
+    return History(network)
 
 
-def save(info: dict = None, history: sim.history.History = None, name=None, timestamp=True,
+def save(info: dict = None, history: History = None, name=None, timestamp=True,
          by_date=True, by_scheme=True):
     """
     :param info: Send the 'input_data' dict here, which is the dict created after input json file is parsed
@@ -105,6 +92,8 @@ def save(info: dict = None, history: sim.history.History = None, name=None, time
     :return Location of saved file
     """
 
+    # TODO : WIP.. Test and debug this !
+
     saved_data = {"info": None, "history": None}
 
     estimation_scheme = "Unknown"
@@ -112,7 +101,7 @@ def save(info: dict = None, history: sim.history.History = None, name=None, time
         saved_data["info"] = info
         estimation_scheme = info["scheme"]
 
-    if not isinstance(history, sim.history.History):
+    if not isinstance(history, History):
         raise ValueError
     saved_data["history"] = vars(history)
 

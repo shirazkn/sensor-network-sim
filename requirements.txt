@@ -1,5 +1,4 @@
 numpy
 wxpython
 jupyter
-JSON-minify
 matplotlib
