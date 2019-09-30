@@ -2,8 +2,10 @@
 Function to deal with sensor creation, update etc
 """
 import sim.sensor
-import sim.messages
+import sim.mailbox
 import sim.errors
+import sim.helpers
+from copy import deepcopy
 
 # Add your new estimation scheme here
 import sim.estimators.template
@@ -20,20 +22,12 @@ def create(input_data):
     :param input_data: result of setting.initialize.do_everything()
     :return: network object with sensors
     """
-    estimation_scheme = input_data["scheme"]
+    _data = deepcopy(input_data)
+    estimation_scheme = _data["scheme"]
     network = sim.network.Network(estimation_scheme)
-    network.create_sensors(input_data["network"])
-    network.messages = sim.messages.Messages(network)
+    network.create_sensors(_data["network"])
+    network.messages = sim.mailbox.Mailbox(network)
     return network
-
-
-def get_sensor_ids(data):
-    data["indexing_style"] = data.get("indexing_style", "python")
-
-    if data["indexing_style"] == "matlab":
-        return [str(_id) for _id in range(1, data["n_sensors"] + 1)]
-    elif data["indexing_style"] == "python":
-        return [str(_id) for _id in range(data["n_sensors"])]
 
 
 class Network:
@@ -45,29 +39,13 @@ class Network:
         """
         Makes a dict where key is the sensor ID and value is the sensor dict
         """
-
-        self.SensorClass = sim.estimators.template.EstimatorTemp
-        self.sensor_params = {}
-
-        # Add your new estimation scheme here
-
-        if estimation_scheme == "KCF":
-            self.SensorClass = sim.estimators.KCF_2007.EstimatorKCF
-            self.sensor_params = {"epsilon": 0.25}
-
-        elif estimation_scheme == "OMVF":
-            self.SensorClass = sim.estimators.OptimalMVF.EstimatorOMVF
-
-        elif estimation_scheme == "ICF":
-            self.SensorClass = sim.estimators.ICF_2013.EstimatorICF
-            self.sensor_params = {"epsilon": 0.25}
-        else:
-            print("Wrong estimation scheme ; No estimator selected!")
-
         self.sensors: Dict[str, sim.sensor.Sensor] = {}
 
+        self.sensor_params = {}
+        self.SensorClass, self.sensor_params = sim.sensor.get_estimator(estimation_scheme)
+
         # Messages shared between sensors in the network
-        self.messages: sim.messages.Messages
+        self.messages: sim.mailbox.Mailbox
 
         # Info needed about the target
         self.target_info = {key: None for key in self.SensorClass.INFO_NEEDED_FROM_TARGET}
@@ -81,8 +59,8 @@ class Network:
         obs_matrices = data["observation_matrices"]
         cov_matrices = data["noise_covariances"]
 
-        # Using uniquely 'named' sensor objects instead of relying on list indices
-        sensor_ids = get_sensor_ids(data)
+        # Using uniquely 'named' sensor objects
+        sensor_ids = sim.helpers.get_unique_ids(data["n_sensors"])
 
         for index in range(data["n_sensors"]):
             _id = sensor_ids[index]

@@ -8,6 +8,6 @@ def read_configs(filenames):
     for filename in filenames:
         logging.debug("Reading the file %s...", filename)
         with open(filename, "r") as file:
-            raw_data = json_minify(file.read())
+            raw_data = file.read()
             data.update(json.loads(raw_data))
     return data

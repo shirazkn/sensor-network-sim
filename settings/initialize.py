@@ -1,51 +1,48 @@
 import numpy as np
-from numpy import pi
 import sim.network
+import sim.helpers
 
 
 def pre_process_target(raw_data):
     """
-    Populate state_space matrices
-    :param raw_data: json_dict["target"]
-    :return: Nothing
+    Get state_space matrices for target (from json information)
     """
     target_data = raw_data["target"]
+
+    ss_A = np.array(target_data["state_space"]["ss_A"])
+    target_data["state_space"]["ss_A"] = ss_A
     ss_B = np.array(target_data["state_space"]["ss_B"])
     target_data["state_space"]["ss_B"] = ss_B
-    target_data["state_space"]["dimension"] = ss_B.shape[0]
 
-    if not target_data["state_space"].get("ss_A"):
-        if target_data["state_space"]["motion"]["type"] == "circular":
-            speed = target_data["state_space"]["motion"]["parameter"] or 200
-
-            ss_A = [
-                [np.cos(pi / speed), -np.sin(pi / speed)],
-                [np.sin(pi / speed), np.cos(pi / speed)],
-            ]
-
-            ss_A = np.array(ss_A)
-            target_data["state_space"]["ss_A"] = np.array(ss_A)
-            del target_data["state_space"]["motion"]
+    target_data["dimensions"] = {"state": ss_A.shape[0]}
+    # target_data["dimensions"]["noise"] = ss_B.shape[0]
 
     return
 
 
 def pre_process_network(raw_data):
+    """
+    Get observation models for network (from json information)
+    """
     network = raw_data["network"]
     adj_matrix = np.array(network["adjacency"])
     network["n_sensors"] = len(adj_matrix)
-    network["observation_matrices"] = pre_process_matrices(network, network["observation_matrices"]["default"])
-    network["noise_covariances"] = pre_process_matrices(network, network["noise_covariances"]["default"])
+    network["observation_matrices"] = get_matrices_for_all_sensors(network, network["observation_matrices"]["default"])
+    network["noise_covariances"] = get_matrices_for_all_sensors(network, network["noise_covariances"]["default"])
 
     return
 
 
-def pre_process_matrices(network_data, default_matrix):
-    default_matrix = default_matrix
+def get_matrices_for_all_sensors(network_data, default_matrix):
+    """
+    Returns {"ID": <Matrix>} dict for all sensors in network
+    """
+    sensor_ids = sim.helpers.get_unique_ids(network_data["n_sensors"])
+
     matrices = {}
-    sensor_ids = sim.network.get_sensor_ids(network_data)
-    for id in sensor_ids:
-        matrices[id] = default_matrix
+    for _id in sensor_ids:
+        matrices[_id] = default_matrix
+
     return matrices
 
 
@@ -54,4 +51,5 @@ def do_everything(raw_data):
     assert np.all(adj_matrix == adj_matrix.transpose()), "Adjacency matrix must be symmetric."
     pre_process_target(raw_data)
     pre_process_network(raw_data)
+
     return raw_data

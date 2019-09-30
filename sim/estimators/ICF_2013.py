@@ -1,7 +1,7 @@
 """
 ------------------------
-Information Consensus Filter
-?, 2013
+Information Consensus Filter (2013)
+Implemented with a single consensus iteration per estimation iteration
 ------------------------
 Notes:
     Sub-optimal gains
