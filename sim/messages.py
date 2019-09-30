@@ -9,12 +9,12 @@ class Messages:
         sensor_ids = network.sensors.keys()
 
         message_dict = {key: None for key in network.SensorClass.INFO_NEEDED_FROM_NEIGHBORS}
-        self.all_messages: Dict[str, dict] = {sensor_id: message_dict for sensor_id in sensor_ids}
+        self.all: Dict[str, dict] = {sensor_id: message_dict for sensor_id in sensor_ids}
 
     def send(self, sender_id, payload):
         for key, value in payload.items():
-            self.all_messages[sender_id][key] = value
+            self.all[sender_id][key] = value
 
     def receive_from_sensor(self, sender_id):
-        return self.all_messages[sender_id]
+        return self.all[sender_id]
 

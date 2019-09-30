@@ -33,10 +33,10 @@ class EstimatorOMVF(sim.sensor.Sensor):
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-        self.estimate_prior = column(np.array([20, 0]))
+        self.estimate_prior = column(np.array([0.0, 0.0]))
         self.ErrCov_prior = np.array(
-            [[1.0, 0.0],
-             [0.0, 1.0]]
+            [[0.0, 0.0],
+             [0.0, 0.0]]
         )
         self.K_gain = {_id: None for _id in (self.neighbors + [self.id])}
         self.C_gain = {_id: None for _id in (self.neighbors + [self.id])}
