@@ -1,16 +1,17 @@
 ## Sensor Network Simulation (WIP)
-#### For testing distributed estimation algorithms
+#### For implementing/analyzing consensus-based distributed estimation algorithms
 
-The program is written within the context of consensus-based distributed estimation algorithms. 
+- Models target dynamics, sensor measurement & estimation
+- Uses OOP concepts to keep track of flow of information between sensors
+For eg. Each sensor ‘transmits’ and ‘receives’ information to/from its neighbors. The information is processed ‘locally’ via classmethods, mimicking many of the realistic limitations on such sensor networks.
 
-The intent is to write modular OOP-based code, so that one can keep track of the flow of information.
-For eg. Each sensor ‘transmits’ and ‘receives’ information to/from its neighbors. The information is processed ‘locally’ via classmethods, mimicking many of the realistic limitations on such sensor networks. 
+- Allows for easy extension into realistic sensor network limitations such as packet drops, asynchronous update and bandwidth considerations.
 
-Also allows for easy extension into real sensor network limitations such as packet drops, asynchronous update and bandwidth considerations.
+- Allows for easy implementation of new estimation algorithms and numerical comparison amongst them
 
 #### Here are the instructions to...
 ### Install :
-Requires Python 3.5+
+Install Python 3.5+
 
 Install requirements using,
 ```
@@ -21,7 +22,7 @@ Open Jupyter Notebook using,
 ```
 jupyter notebook main.ipynb
 ```
-Press `shift+enter` to execute cells sequentially.
+Press `shift+enter` to execute cells
 ### Other :
 To edit the simulation parameters and target/sensor characteristics, edit the json files in `settings/json-files`.
 
@@ -36,4 +37,4 @@ class My_New_Estimator(sim.sensor.Sensor):
         ...
 
 ```
-See `template.EstimatorTemp` for the exact details.
+See `template.EstimatorTemp.py` for an example.
