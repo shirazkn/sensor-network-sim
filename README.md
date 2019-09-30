@@ -22,7 +22,7 @@ Open Jupyter Notebook using,
 ```
 jupyter notebook main.ipynb
 ```
-Press `shift+enter` to execute cells
+
 ### Other :
 To edit the simulation parameters and target/sensor characteristics, edit the json files in `settings/json-files`.
 
