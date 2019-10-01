@@ -1,5 +1,5 @@
 """
-An example of how to implement your own sensor-estimator.
+An example of how to implement your own sensor-estimator.py.
 This is the only extra file you should have to create.
 """
 
@@ -10,7 +10,7 @@ import sim.sensor
 
 class EstimatorTemp(sim.sensor.Sensor):
     """
-    An example of how an implemented sensor-estimator class could look
+    An example of how an implemented sensor-estimator.py class could look
     """
 
     # What information does a sensor need about the target?

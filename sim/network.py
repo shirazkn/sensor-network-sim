@@ -2,72 +2,55 @@
 Function to deal with sensor creation, update etc
 """
 import sim.sensor
+import sim.estimator
 import sim.mailbox
 import sim.errors
 import sim.helpers
 from copy import deepcopy
 
-# Add your new estimation scheme here
-import sim.estimators.template
-import sim.estimators.KCF_2007
-import sim.estimators.OptimalMVF
-import sim.estimators.ICF_2013
-
 from typing import Dict
-
-
-def create(input_data):
-    """
-    Creates network object and adds sensors.
-    :param input_data: result of setting.initialize.do_everything()
-    :return: network object with sensors
-    """
-    _data = deepcopy(input_data)
-    estimation_scheme = _data["scheme"]
-    network = sim.network.Network(estimation_scheme)
-    network.create_sensors(_data["network"])
-    network.messages = sim.mailbox.Mailbox(network)
-    return network
 
 
 class Network:
     """
-    To make the sensor network indexing easier (without having to deal with the mutability of a list)
+    Triggers network-wide operations such as 'do_estimation'
+    (Synchronous, and hence fundamentally flawed implementation since it assumes the presence of a supervisor)
     """
 
     def __init__(self, estimation_scheme=None):
-        """
-        Makes a dict where key is the sensor ID and value is the sensor dict
-        """
+        # Dict of {sensor_ID : Sensor object}
         self.sensors: Dict[str, sim.sensor.Sensor] = {}
 
         self.sensor_params = {}
-        self.SensorClass, self.sensor_params = sim.sensor.get_estimator(estimation_scheme)
+        self.SensorClass, self.sensor_params = sim.estimator.get_estimator(estimation_scheme)
 
-        # Messages shared between sensors in the network
-        self.messages: sim.mailbox.Mailbox
+        # Messages shared between sensors in the network are put in the 'mailbox'
+        self.mailbox: sim.mailbox.Mailbox
 
-        # Info needed about the target
+        # Info needed about the target at every time-step
         self.target_info = {key: None for key in self.SensorClass.INFO_NEEDED_FROM_TARGET}
 
     def create_sensors(self, data: dict):
         """
         Make all sensors in the network
-        :param data: input_data["network"]
         """
         adjacency_matrix = data["adjacency"]
-        obs_matrices = data["observation_matrices"]
-        cov_matrices = data["noise_covariances"]
 
         # Using uniquely 'named' sensor objects
         sensor_ids = sim.helpers.get_unique_ids(data["n_sensors"])
 
         for index in range(data["n_sensors"]):
+            # Get own ID
             _id = sensor_ids[index]
+
+            # Get neighbors' IDs
             neighbor_indices = _get_neighbor_indices(index, adjacency_matrix[index][:])
             neighbors = [sensor_ids[_i] for _i in neighbor_indices]
-            obs_matrix = obs_matrices[_id]
-            cov_matrix = cov_matrices[_id]
+
+            # Get observation model
+            obs_matrix = data["observation_matrices"][_id]
+            cov_matrix = data["noise_covariances"][_id]
+
             self.add_sensor(_id, neighbors, obs_matrix, cov_matrix, **self.sensor_params)
 
     def add_sensor(self, id, neighbors, obs_matrix, noise_cov_matrix, **kwargs):
@@ -78,9 +61,8 @@ class Network:
         :param noise_cov_matrix: numpy nd array, Noise co-variance
         """
         assert str(id) not in self.sensors, "Duplicate sensor ID!"
-
-        # (Note : Must use keyword args here...)
-        sensor_object = self.SensorClass(sensor_id=id, neighbors=neighbors, obs_matrix=obs_matrix, noise_cov_matrix=noise_cov_matrix, **kwargs)
+        sensor_object = self.SensorClass(sensor_id=id, neighbors=neighbors, obs_matrix=obs_matrix,
+                                         noise_cov_matrix=noise_cov_matrix, **kwargs)
         self.sensors[str(id)] = sensor_object
 
     def make_measurements(self, target_x):
@@ -96,21 +78,42 @@ class Network:
         """
         for sensor_ID, sensor in self.sensors.items():
             payload = {key: sensor[key] for key in sensor.INFO_NEEDED_FROM_NEIGHBORS}
-            self.messages.send(sensor_ID, payload.copy())
+            self.mailbox.send(sensor_ID, payload.copy())
 
     def get_info_about_target(self, target):
+        """
+        Sensors may access target's state-space matrices
+        """
         for key in self.target_info:
             self.target_info[key] = target[key]
 
     def do_estimations(self):
+        """
+        All sensors do estimation
+        """
         for sensor in self.sensors.values():
             neighbor_info = {}
             for neighbor_ID in sensor.neighbors:
-                neighbor_info[neighbor_ID] = self.messages.receive_from_sensor(neighbor_ID)
+                neighbor_info[neighbor_ID] = self.mailbox.receive_from_sensor(neighbor_ID)
             sensor.do_estimation(self.target_info, neighbor_info)
 
 
+def create(input_data):
+    """
+    Creates new Network object based on input data
+    """
+    _data = deepcopy(input_data)
+    estimation_scheme = _data["scheme"]
+    network = sim.network.Network(estimation_scheme)
+    network.create_sensors(_data["network"])
+    network.mailbox = sim.mailbox.Mailbox(network)
+    return network
+
+
 def _get_neighbor_indices(self_index, adjacency_row):
+    """
+    Get list of sensors connected to the sensor <self_index>
+    """
     return [
         index
         for index, value in enumerate(adjacency_row)

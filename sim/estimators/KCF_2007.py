@@ -29,10 +29,10 @@ class EstimatorKCF(sim.sensor.Sensor):
     def __init__(self, epsilon, **kwargs):
 
         super().__init__(**kwargs)
-        self.estimate_prior = column(np.array([20, 0]))
+        self.estimate_prior = column(np.array([100.0, 0.0]))
         self.ErrCov_prior = np.array(
-            [[1.0, 0.0],
-             [0.0, 1.0]]
+            [[1000.0, 0.0],
+             [0.0, 100.0]]
         )
         self.K_gain = None
         self.C_gain = {_id: None for _id in self.neighbors}
@@ -77,6 +77,6 @@ class EstimatorKCF(sim.sensor.Sensor):
 
         self.ErrCov = (_F @ self.ErrCov_prior @ _F.T) + (self.K_gain @ self.NoiseCov @ self.K_gain.T)
         self.ErrCov_prior = ((target_info["A"] @ self.ErrCov @ target_info["A"].T)
-                             + (target_info["B"] @ target_info["NoiseCov"] @ target_info["B"]))
+                             + (target_info["B"] @ target_info["NoiseCov"] @ target_info["B"].T))
 
         self.estimate_prior = target_info["A"] @ self.estimate

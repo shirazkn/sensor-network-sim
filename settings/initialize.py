@@ -5,7 +5,7 @@ import sim.helpers
 
 def pre_process_target(raw_data):
     """
-    Get state_space matrices for target (from json information)
+    Convert state-space matrices into n-D Numpy arrays
     """
     target_data = raw_data["target"]
 
@@ -22,7 +22,7 @@ def pre_process_target(raw_data):
 
 def pre_process_network(raw_data):
     """
-    Get observation models for network (from json information)
+    Get observation models and noise-covariances for all sensors in network (from json file information)
     """
     network = raw_data["network"]
     adj_matrix = np.array(network["adjacency"])
@@ -47,6 +47,9 @@ def get_matrices_for_all_sensors(network_data, default_matrix):
 
 
 def do_everything(raw_data):
+    """
+    Does some pre-processing and sanity-checking for input data
+    """
     adj_matrix = np.array(raw_data["network"]["adjacency"])
     assert np.all(adj_matrix == adj_matrix.transpose()), "Adjacency matrix must be symmetric."
     pre_process_target(raw_data)

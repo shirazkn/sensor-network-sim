@@ -1,11 +1,10 @@
 """
 Sensor base class.
-Handles measurement/sensing methods, whereas inheriting class handles estimation
+Handles measurement/sensing methods, whereas inheriting (Estimator) class handles estimation
 """
 import numpy as np
 import sim.noise
 import sim.errors
-import sim.estimators
 
 from sim.helpers import column
 from typing import List, Dict
@@ -54,21 +53,3 @@ class Sensor:
         return self.__dict__[key]
 
 
-def get_estimator(estimation_scheme):
-    sensor_params = {}
-
-    if estimation_scheme == "KCF":
-        SensorClass = sim.estimators.KCF_2007.EstimatorKCF
-        sensor_params = {"epsilon": 0.25}
-
-    elif estimation_scheme == "OMVF":
-        SensorClass = sim.estimators.OptimalMVF.EstimatorOMVF
-
-    elif estimation_scheme == "ICF":
-        SensorClass = sim.estimators.ICF_2013.EstimatorICF
-        sensor_params = {"epsilon": 0.25}
-    else:
-        SensorClass = sim.estimators.template.EstimatorTemp
-        print("Wrong estimation scheme ; No estimator selected!")
-
-    return SensorClass, sensor_params
