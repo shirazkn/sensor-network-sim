@@ -66,6 +66,8 @@ class History:
         plt.rcParams["figure.figsize"] = FIGURE_SIZE
         y_vals = [la.norm(_matrix, 'fro') for _matrix in self.sensors[ErrCov_of]["ErrCov"]]
         plt.plot(y_vals, label=f"Sensor {ErrCov_of}")
+        if ErrCov_of:
+            plt.title("Estimated Error Covariance")
         plt.xlabel("Iteration")
         plt.ylabel("Err Cov. (Frob. Norm)")
         plt.legend(loc='lower right')

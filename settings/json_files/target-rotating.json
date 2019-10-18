@@ -2,7 +2,7 @@
   "target": {
     "constraints": {
       "x_initial": [
-        80, 20
+        60, 10
       ]
     },
     "state_space": {
