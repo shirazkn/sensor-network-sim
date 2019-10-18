@@ -1,7 +1,7 @@
 import sim.estimators.template
 import sim.estimators.KCF_2007
 import sim.estimators.ICF_2013
-import sim.estimators.OptimalIVF
+import sim.estimators.SubIVF
 
 
 def get_estimator(estimation_scheme):
@@ -11,8 +11,8 @@ def get_estimator(estimation_scheme):
         SensorClass = sim.estimators.KCF_2007.EstimatorKCF
         sensor_params = {"epsilon": 0.25}
 
-    elif estimation_scheme == "OIVF":
-        SensorClass = sim.estimators.OptimalIVF.EstimatorOIVF
+    elif estimation_scheme == "SIVF":
+        SensorClass = sim.estimators.SubIVF.EstimatorSIVF
 
     elif estimation_scheme == "ICF":
         SensorClass = sim.estimators.ICF_2013.EstimatorICF

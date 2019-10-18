@@ -1,13 +1,12 @@
 """
 ------------------------------------------------
-Optimal Measurement Vector Fusion with Consensus
+Sub-Optimal Innovation Vector Fusion with Consensus
 Shiraz Khan (Research work from Summer '19)
 ------------------------------------------------
 Notes:
     Does not account for cross-covariances
-
-Base Sensor class has Obs, ErrCov, NoiseCov, measurement, estimate..
-Prior quantities need to be described here
+    This algorithm does not perform as intended, and served as a
+    learning experience. It underestimates the posterior covariance.
 """
 
 import logging
@@ -18,7 +17,7 @@ import numpy as np
 import numpy.linalg as la
 
 
-class EstimatorOIVF(sim.sensor.Sensor):
+class EstimatorSIVF(sim.sensor.Sensor):
     """
     An example of how an implemented sensor-estimator.py class could look
     """
