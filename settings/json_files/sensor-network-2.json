@@ -1,21 +1,11 @@
 {
 	"network": {
-		"indexing_style": "matlab",
 		"adjacency": [
 		  [
-			1, 0, 1, 1, 0
+			1, 1
 		  ],
 		  [
-			0, 1, 1, 0, 1
-		  ],
-		  [
-			1, 1, 1, 1, 1
-		  ],
-		  [
-			1, 0, 1, 1, 0
-		  ],
-		  [
-			0, 1, 1, 0, 1
+			1, 1
 		  ]
 		],
 		"observation_matrices":{
