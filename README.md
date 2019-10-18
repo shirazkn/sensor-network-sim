@@ -7,7 +7,7 @@ For eg. Each sensor ‘transmits’ and ‘receives’ information to/from its n
 
 - Allows for easy extension into realistic sensor network limitations such as packet drops, asynchronous update and bandwidth considerations.
 
-- Allows for easy implementation of new estimation algorithms and numerical comparison amongst them
+- Allows for easy implementation of new estimation algorithms and numerical comparison amongst them by running them concurrently
 
 #### Here are the instructions to...
 ### Install :
@@ -20,7 +20,7 @@ pip3 install -r requirements.txt
 ### Run :
 Open Jupyter Notebook using,
 ```
-jupyter notebook main.ipynb
+jupyter notebook Simulation.ipynb
 ```
 
 ### Other :
