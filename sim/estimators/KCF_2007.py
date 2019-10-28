@@ -18,17 +18,17 @@ import numpy.linalg as la
 
 
 class EstimatorKCF(sim.sensor.Sensor):
+    ESTIMATION_STEPS = ["make_measurement", "send_messages", "receive_messages", "get_target_info", "do_estimation"]
 
-    # What information does a sensor need about the target?
     INFO_NEEDED_FROM_TARGET: List[str] = ["A", "B", "NoiseCov"]
-
-    # What information does the sensor need from its neighbors?
     INFO_NEEDED_FROM_NEIGHBORS: List[str] = ["estimate_prior"]
 
     # If you need an init function, you must also call super().__init__ like this
     def __init__(self, epsilon, **kwargs):
 
         super().__init__(**kwargs)
+        self.estimation_steps = [self.__getattribute__(step) for step in self.ESTIMATION_STEPS]
+
         self.estimate_prior = column(np.array([100.0, 0.0]))
         self.ErrCov_prior = np.array(
             [[1000.0, 0.0],

@@ -39,6 +39,7 @@ class Sensor:
             [None, None],
             [None, None]]
         )
+        self.network = None
 
     def make_measurement(self, target_x: np.array):
         """
@@ -47,8 +48,19 @@ class Sensor:
         """
         self.measurement = (self.Obs @ target_x) + self.noise.sample()
 
-    def do_estimation(self, target_info: dict, neighbor_info: Dict[str, dict]):
-        raise sim.errors.InvalidSensorClass("The method do_estimation needs to be defined in inherited class.")
+    def get_target_info(self):
+        # TODO
+        pass
+
+    def send_messages(self):
+        # TODO
+        for sensor_ID, sensor in self.sensors.items():
+            payload = {key: sensor[key] for key in self.SensorClass.INFO_NEEDED_FROM_NEIGHBORS}
+            self.mailbox.send(sensor_ID, payload.copy())
+
+    def receive_messages(self):
+        # TODO
+        pass
 
     def __getitem__(self, key):
         return self.__dict__[key]

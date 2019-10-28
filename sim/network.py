@@ -28,9 +28,6 @@ class Network:
         # Messages shared between sensors in the network are put in the 'mailbox'
         self.mailbox: sim.mailbox.Mailbox
 
-        # Info needed about the target at every time-step
-        self.target_info = {key: None for key in self.SensorClass.INFO_NEEDED_FROM_TARGET}
-
     def create_sensors(self, data: dict):
         """
         Make all sensors in the network
@@ -75,44 +72,6 @@ class Network:
         sensor_object = self.SensorClass(sensor_id=id, neighbors=neighbors, obs_matrix=obs_matrix,
                                          noise_cov_matrix=noise_cov_matrix, **kwargs)
         self.sensors[str(id)] = sensor_object
-
-    def make_measurements(self, target_x):
-        """
-        All sensors make noisy measurements
-        """
-        for sensor in self.sensors.values():
-            sensor.make_measurement(target_x)
-
-    def share_info_with_neighbors(self):
-        """
-        All sensors share information and prepare for estimation
-        """
-        for sensor_ID, sensor in self.sensors.items():
-            payload = {key: sensor[key] for key in self.SensorClass.INFO_NEEDED_FROM_NEIGHBORS}
-            self.mailbox.send(sensor_ID, payload.copy())
-
-    def get_info_about_target(self, target):
-        """
-        Sensors may access target's state-space matrices
-        """
-        for key in self.target_info:
-            self.target_info[key] = target[key]
-
-    def do_estimations(self):
-        """
-        All sensors do estimation
-        """
-        if not self.SensorClass.REQUIRES_GLOBAL_INFO:
-            for sensor in self.sensors.values():
-                neighbor_info = {}
-                for neighbor_ID in sensor.neighbors:
-                    neighbor_info[neighbor_ID] = self.mailbox.receive_from_sensor(neighbor_ID)
-                sensor.do_estimation(self.target_info, neighbor_info)
-
-        else:
-            neighbor_info = {sensor.id: self.mailbox.receive_from_sensor(sensor.id) for sensor in self.sensors.values()}
-            for sensor in self.sensors.values():
-                sensor.do_estimation(self.target_info, neighbor_info)
 
 
 def create(input_data):

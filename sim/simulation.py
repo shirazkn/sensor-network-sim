@@ -41,8 +41,10 @@ def simulate_many(input_data, duration=100, est_schemes=None, sensor_initials=No
             for sensor in networks[-1].sensors.values():
                 sensor.ErrCov_prior = np.array(sensor_initials["ErrCov_prior"])
                 sensor.estimate_prior = np.array(sensor_initials["estimate_prior"])
-                # print(sensor.estimate_prior)
 
+    import pdb
+    pdb.set_trace()
+    
     print(f"Simulating for {duration} time-steps...")
     for t in range(duration):
         for _sim in simulations:
