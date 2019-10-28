@@ -43,6 +43,7 @@ def simulate_many(input_data, duration=100, est_schemes=None, sensor_initials=No
                 sensor.estimate_prior = np.array(sensor_initials["estimate_prior"])
                 # print(sensor.estimate_prior)
 
+    print(f"Simulating for {duration} time-steps...")
     for t in range(duration):
         for _sim in simulations:
             _sim.add_target(target.x)
@@ -56,4 +57,5 @@ def simulate_many(input_data, duration=100, est_schemes=None, sensor_initials=No
 
         target.update()
 
+    print("Done. \n ---------------------------- ")
     return simulations

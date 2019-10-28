@@ -18,6 +18,7 @@ class Sensor:
     # (See inheriting sensor class for usage; should be overridden)
     INFO_NEEDED_FROM_TARGET: List[str] = None
     INFO_NEEDED_FROM_NEIGHBORS: List[str] = None
+    REQUIRES_GLOBAL_INFO: bool = False
 
     def __init__(self, sensor_id, neighbors, obs_matrix, noise_cov_matrix):
 

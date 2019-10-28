@@ -6,6 +6,7 @@ import sim.estimator
 import sim.mailbox
 import sim.errors
 import sim.helpers
+from sim.estimator import EST_SCHEMES
 from copy import deepcopy
 
 from typing import Dict
@@ -21,8 +22,8 @@ class Network:
         # Dict of {sensor_ID : Sensor object}
         self.sensors: Dict[str, sim.sensor.Sensor] = {}
 
-        self.sensor_params = {}
-        self.SensorClass, self.sensor_params = sim.estimator.get_estimator(estimation_scheme)
+        self.est_scheme = estimation_scheme
+        self.SensorClass, self.sensor_params = sim.estimator.get_estimator(self.est_scheme)
 
         # Messages shared between sensors in the network are put in the 'mailbox'
         self.mailbox: sim.mailbox.Mailbox
@@ -38,6 +39,16 @@ class Network:
 
         # Using uniquely 'named' sensor objects
         sensor_ids = sim.helpers.get_unique_ids(data["n_sensors"])
+
+        if self.SensorClass.REQUIRES_GLOBAL_INFO:
+            print(f"Warning, the scheme {EST_SCHEMES[self.est_scheme]['short-name']} is not fully distributed.")
+            self.sensor_params["all_sensors"] = sensor_ids.copy()
+            self.sensor_params["adj_matrix"] = adjacency_matrix.copy()
+
+        if EST_SCHEMES[self.est_scheme]["name"] == "-N/A-":
+            print("Warning, could not select estimation scheme!")
+        else:
+            print(f"Initializing a sensor network with {EST_SCHEMES[self.est_scheme]['short-name']} scheme...")
 
         for index in range(data["n_sensors"]):
             # Get own ID
@@ -77,7 +88,7 @@ class Network:
         All sensors share information and prepare for estimation
         """
         for sensor_ID, sensor in self.sensors.items():
-            payload = {key: sensor[key] for key in sensor.INFO_NEEDED_FROM_NEIGHBORS}
+            payload = {key: sensor[key] for key in self.SensorClass.INFO_NEEDED_FROM_NEIGHBORS}
             self.mailbox.send(sensor_ID, payload.copy())
 
     def get_info_about_target(self, target):
@@ -91,11 +102,17 @@ class Network:
         """
         All sensors do estimation
         """
-        for sensor in self.sensors.values():
-            neighbor_info = {}
-            for neighbor_ID in sensor.neighbors:
-                neighbor_info[neighbor_ID] = self.mailbox.receive_from_sensor(neighbor_ID)
-            sensor.do_estimation(self.target_info, neighbor_info)
+        if not self.SensorClass.REQUIRES_GLOBAL_INFO:
+            for sensor in self.sensors.values():
+                neighbor_info = {}
+                for neighbor_ID in sensor.neighbors:
+                    neighbor_info[neighbor_ID] = self.mailbox.receive_from_sensor(neighbor_ID)
+                sensor.do_estimation(self.target_info, neighbor_info)
+
+        else:
+            neighbor_info = {sensor.id: self.mailbox.receive_from_sensor(sensor.id) for sensor in self.sensors.values()}
+            for sensor in self.sensors.values():
+                sensor.do_estimation(self.target_info, neighbor_info)
 
 
 def create(input_data):

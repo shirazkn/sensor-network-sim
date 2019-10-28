@@ -2,23 +2,39 @@ import sim.estimators.template
 import sim.estimators.KCF_2007
 import sim.estimators.ICF_2013
 import sim.estimators.SubIVF
+import sim.estimators.KCF_WC
+
+EST_SCHEMES = {
+    "KCF": {
+        "name": "Kalman Consensus Filter",
+        "short-name": "KCF (2009)",
+        "class": sim.estimators.KCF_2007.EstimatorKCF,
+        "params": {"epsilon": 0.25},
+    },
+    "ICF": {
+        "name": "Information Consensus Filter",
+        "short-name": "ICF (2013)",
+        "class": sim.estimators.ICF_2013.EstimatorICF,
+        "params": {"epsilon": 0.25},
+    },
+    "SIVF": {
+        "name": "Sub-optimal Innovation Vector Fusion",
+        "short-name": "Sub-optimal IVF",
+        "class": sim.estimators.SubIVF.EstimatorSIVF,
+    },
+    "KCF-WC": {
+        "name": "Kalman Consensus Filter with Weighted Consensus",
+        "short-name": "KCF-WC",
+        "class": sim.estimators.KCF_WC.EstimatorKCF_WC,
+    },
+    "No_Scheme": {
+        "name": "-N/A-",
+        "short-name": "-N/A-",
+        "class": sim.estimators.template.EstimatorTemp
+    }
+}
 
 
 def get_estimator(estimation_scheme):
-    sensor_params = {}
-
-    if estimation_scheme == "KCF":
-        SensorClass = sim.estimators.KCF_2007.EstimatorKCF
-        sensor_params = {"epsilon": 0.25}
-
-    elif estimation_scheme == "SIVF":
-        SensorClass = sim.estimators.SubIVF.EstimatorSIVF
-
-    elif estimation_scheme == "ICF":
-        SensorClass = sim.estimators.ICF_2013.EstimatorICF
-        sensor_params = {"epsilon": 0.25}
-    else:
-        SensorClass = sim.estimators.template.EstimatorTemp
-        print("Wrong estimation scheme ; No estimator.py selected!")
-
-    return SensorClass, sensor_params
+    Est_Scheme_Dict = EST_SCHEMES.get(estimation_scheme, EST_SCHEMES["No_Scheme"])
+    return Est_Scheme_Dict["class"], Est_Scheme_Dict.get("params", {})
