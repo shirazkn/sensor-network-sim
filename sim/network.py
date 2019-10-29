@@ -42,7 +42,7 @@ class Network:
 
         if self.SensorClass.REQUIRES_GLOBAL_INFO:
             print(f"Warning, the scheme {EST_SCHEMES[self.est_scheme]['short-name']} is not fully distributed.")
-            self.sensor_params["all_sensors"] = sensor_ids.copy()
+            self.sensor_params["all_sensor_ids"] = sensor_ids.copy()
             self.sensor_params["adj_matrix"] = adjacency_matrix.copy()
 
         if EST_SCHEMES[self.est_scheme]["name"] == "-N/A-":
@@ -112,7 +112,7 @@ class Network:
         else:
             neighbor_info = {sensor.id: self.mailbox.receive_from_sensor(sensor.id) for sensor in self.sensors.values()}
             for sensor in self.sensors.values():
-                sensor.do_estimation(self.target_info, neighbor_info)
+                sensor.do_estimation(self.target_info, self.sensors)
 
 
 def create(input_data):

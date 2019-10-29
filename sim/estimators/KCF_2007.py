@@ -49,7 +49,6 @@ class EstimatorKCF(sim.sensor.Sensor):
         # import pdb; pdb.set_trace()
 
         # See KCF Raj (2017) for equation numbers.
-
         # Find K and Cs
         self.calc_K_gain()
         self.calc_C_gains()

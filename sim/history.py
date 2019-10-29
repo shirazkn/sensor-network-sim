@@ -5,6 +5,7 @@ import logging
 import matplotlib.pyplot as plt
 import sim.network
 import numpy.linalg as la
+import numpy as np
 
 FIGURE_SIZE = (12, 7)
 
@@ -62,7 +63,7 @@ class History:
         plt.legend(loc='upper right')
         plt.show()
 
-    def plot_timeseries(self, ErrCov_of: str = None):
+    def plot_ErrCov(self, ErrCov_of: str = None):
         plt.rcParams["figure.figsize"] = FIGURE_SIZE
         y_vals = [la.norm(_matrix, 'fro') for _matrix in self.sensors[ErrCov_of]["ErrCov"]]
         plt.plot(y_vals, label=f"Sensor {ErrCov_of}")
@@ -70,6 +71,24 @@ class History:
             plt.title("Estimated Error Covariance")
         plt.xlabel("Iteration")
         plt.ylabel("Err Cov. (Frob. Norm)")
+        plt.legend(loc='lower right')
+        plt.show()
+
+    def plot_error_sq(self, err_of: str = None):
+        plt.rcParams["figure.figsize"] = FIGURE_SIZE
+
+        time_steps = len(self.sensors[err_of]["x_0"])
+        errors = []
+        for ind in range(10, time_steps):
+            errors.append(np.array([self.sensors[err_of]["x_0"][ind], self.sensors[err_of]["x_1"][ind]]))
+            errors[-1] -= np.array([self.target["x_0"][ind], self.target["x_1"][ind]])
+
+        y_vals = [float(error.T @ error) for error in errors]
+        plt.plot(y_vals, label=f"Sensor {err_of}")
+        if err_of:
+            plt.title("Estimation Error Squared")
+        plt.xlabel("Iteration")
+        plt.ylabel("Err Sq.")
         plt.legend(loc='lower right')
         plt.show()
 
