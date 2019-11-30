@@ -22,7 +22,11 @@ class Network:
         # Dict of {sensor_ID : Sensor object}
         self.sensors: Dict[str, sim.sensor.Sensor] = {}
 
-        self.est_scheme = estimation_scheme
+        if estimation_scheme in EST_SCHEMES:
+            self.est_scheme = estimation_scheme
+        else:
+            raise ValueError(f"Invalid estimation scheme. Available schemes : {[_s for _s in EST_SCHEMES.keys()]}")
+
         self.SensorClass, self.sensor_params = sim.estimator.get_estimator(self.est_scheme)
 
         # Messages shared between sensors in the network are put in the 'mailbox'
@@ -31,25 +35,28 @@ class Network:
         # Info needed about the target at every time-step
         self.target_info = {key: None for key in self.SensorClass.INFO_NEEDED_FROM_TARGET}
 
+    def initialize(self):
+        for sensor in self.sensors.values():
+            sensor.initialize()
+
     def create_sensors(self, data: dict):
         """
         Make all sensors in the network
         """
         adjacency_matrix = data["adjacency"]
 
-        # Using uniquely 'named' sensor objects
+        # Use uniquely 'named' sensor objects
         sensor_ids = sim.helpers.get_unique_ids(data["n_sensors"])
 
+        # Check if sensor requires global information
         if self.SensorClass.REQUIRES_GLOBAL_INFO:
             print(f"Warning, the scheme {EST_SCHEMES[self.est_scheme]['short-name']} is not fully distributed.")
             self.sensor_params["all_sensor_ids"] = sensor_ids.copy()
             self.sensor_params["adj_matrix"] = adjacency_matrix.copy()
 
-        if EST_SCHEMES[self.est_scheme]["name"] == "-N/A-":
-            print("Warning, could not select estimation scheme!")
-        else:
-            print(f"Initializing a sensor network with {EST_SCHEMES[self.est_scheme]['short-name']} scheme...")
+        print(f"Initializing a sensor network with {EST_SCHEMES[self.est_scheme]['short-name']} scheme...")
 
+        # Create and add sensors to network
         for index in range(data["n_sensors"]):
             # Get own ID
             _id = sensor_ids[index]
@@ -78,7 +85,7 @@ class Network:
 
     def make_measurements(self, target_x):
         """
-        All sensors make noisy measurements
+        All sensors make (noisy) measurements
         """
         for sensor in self.sensors.values():
             sensor.make_measurement(target_x)
@@ -110,7 +117,6 @@ class Network:
                 sensor.do_estimation(self.target_info, neighbor_info)
 
         else:
-            neighbor_info = {sensor.id: self.mailbox.receive_from_sensor(sensor.id) for sensor in self.sensors.values()}
             for sensor in self.sensors.values():
                 sensor.do_estimation(self.target_info, self.sensors)
 

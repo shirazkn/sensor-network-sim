@@ -2,7 +2,7 @@ import sim.estimators.template
 import sim.estimators.KCF_2007
 import sim.estimators.ICF_2013
 import sim.estimators.SubIVF
-import sim.estimators.KCF_WC
+import sim.estimators.KCF_WDG
 
 EST_SCHEMES = {
     "KCF": {
@@ -22,10 +22,10 @@ EST_SCHEMES = {
         "short-name": "Sub-optimal IVF",
         "class": sim.estimators.SubIVF.EstimatorSIVF,
     },
-    "KCF-WC": {
+    "KCF-WDG": {
         "name": "Kalman Consensus Filter with Weighted Consensus",
-        "short-name": "KCF-WC",
-        "class": sim.estimators.KCF_WC.EstimatorKCF_WC,
+        "short-name": "KCF-WDG",
+        "class": sim.estimators.KCF_WDG.EstimatorKCF_WDG,
     },
     "No_Scheme": {
         "name": "-N/A-",

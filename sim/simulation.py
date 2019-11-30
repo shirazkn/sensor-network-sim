@@ -33,15 +33,16 @@ def simulate_many(input_data, duration=100, est_schemes=None, sensor_initials=No
     simulations = []
 
     for est_scheme in est_schemes:
-        input_data["scheme"] = est_scheme if est_scheme else input_data["scheme"]
-        networks.append(sim.network.create(input_data))
-        simulations.append(sim.history.create(networks[-1]))
+        input_data["scheme"] = est_scheme
+        new_network = sim.network.create(input_data)
+        networks.append(new_network)
+        simulations.append(sim.history.create(new_network))
 
         if sensor_initials:
-            for sensor in networks[-1].sensors.values():
+            for sensor in new_network.sensors.values():
                 sensor.ErrCov_prior = np.array(sensor_initials["ErrCov_prior"])
                 sensor.estimate_prior = np.array(sensor_initials["estimate_prior"])
-                # print(sensor.estimate_prior)
+        new_network.initialize()
 
     print(f"Simulating for {duration} time-steps...")
     for t in range(duration):

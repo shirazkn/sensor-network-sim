@@ -1,9 +1,10 @@
 """
 ------------------------
-Kalman Consensus Filter with Weighted Consensus (2019)
+Kalman Consensus Filter with Weighted Consensus (KCF-WDG, 2019)
 ------------------------
 Notes:
-    Requires global topology information
+    WDG: Weighted Directed Graphs
+    Requires global topology information for cross-cov. propagation
 """
 
 import logging
@@ -16,7 +17,7 @@ from sim.helpers import column
 import sim.sensor
 
 
-class EstimatorKCF_WC(sim.sensor.Sensor):
+class EstimatorKCF_WDG(sim.sensor.Sensor):
 
     INFO_NEEDED_FROM_TARGET: List[str] = ["A", "B", "NoiseCov"]
     INFO_NEEDED_FROM_NEIGHBORS: List[str] = ["measurement", "estimate", "noise", "Obs"]
@@ -53,11 +54,16 @@ class EstimatorKCF_WC(sim.sensor.Sensor):
         # Kalman gains Ki are stored as K{i: ...}
         K_gains = {_id: get_K_gain(_id, all_sensors, C_gains) for _id in all_sensors.keys()}
 
-        # F = I - KH
+        # F := (I - KH)
         F = {_id:
-             (np.identity(2) - K_gains[_id] @ all_sensors[_id].Obs)
+                 (np.identity(2) - K_gains[_id] @ all_sensors[_id].Obs)
              for _id in all_sensors.keys()}
 
+        self.estimate = self.estimate_prior + K_gains[self.id] @ (self.measurement - self.Obs @ self.estimate_prior) \
+                        + sum([C_gains[_i][j] @ (all_sensors[j].estimate_prior - self.estimate_prior)
+                               for j in self.neighbors])
+
+        # Propagate M_ij
         for i in all_sensors.keys():
             N_i = all_sensors[i].neighbors
             for j in all_sensors.keys():
@@ -77,16 +83,13 @@ class EstimatorKCF_WC(sim.sensor.Sensor):
                 if i == j:
                     self.M[i][j] += K_gains[i] @ all_sensors[i].NoiseCov @ K_gains[i].T
 
+        # Propagate P_ij
         for i in all_sensors.keys():
             for j in all_sensors.keys():
                 self.P[i][j] = (target_info["A"] @ self.M[i][j] @ target_info["A"].T
                                 + target_info["B"] @ target_info["NoiseCov"] @ target_info["B"].T)
 
         self.ErrCov = self.M[_i][_i]
-        self.estimate = self.estimate_prior + K_gains[self.id] @ (self.measurement - self.Obs @ self.estimate_prior)\
-                        + sum([C_gains[_i][j] @ (all_sensors[j].estimate_prior - self.estimate_prior)
-                               for j in self.neighbors])
-
         self.estimate_prior = target_info["A"] @ self.estimate
 
 
@@ -128,6 +131,8 @@ def get_C_gains(_id, sensors):
 def get_K_gain(ID, sensors, C_gains):
     """
     Compute Kalman gain for a sensor
+    :param ID: Sensor i
+    :param sensors: Neighbors
     """
     _i = ID
     sensor = sensors[ID]

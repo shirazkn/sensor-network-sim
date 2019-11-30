@@ -40,6 +40,12 @@ class Sensor:
             [None, None]]
         )
 
+    def initialize(self):
+        """
+        Inheriting class may use this for pre-processing
+        """
+        pass
+
     def make_measurement(self, target_x: np.array):
         """
         Makes noisy measurement of the target
@@ -52,5 +58,3 @@ class Sensor:
 
     def __getitem__(self, key):
         return self.__dict__[key]
-
-
