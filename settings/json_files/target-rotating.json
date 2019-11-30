@@ -2,7 +2,7 @@
   "target": {
     "constraints": {
       "x_initial": [
-        60, 10
+        20, 0
       ]
     },
     "state_space": {
@@ -16,8 +16,8 @@
       ]
     },
     "noise_covariance": [
-              [2,0],
-              [0,2]
+              [5,0],
+              [0,5]
     ]
   }
 }
