@@ -52,7 +52,6 @@ class Network:
         if self.SensorClass.REQUIRES_GLOBAL_INFO:
             print(f"Warning, the scheme {EST_SCHEMES[self.est_scheme]['short-name']} is not fully distributed.")
             self.sensor_params["all_sensor_ids"] = sensor_ids.copy()
-            self.sensor_params["adj_matrix"] = adjacency_matrix.copy()
 
         print(f"Initializing a sensor network with {EST_SCHEMES[self.est_scheme]['short-name']} scheme...")
 

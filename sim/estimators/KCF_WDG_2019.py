@@ -23,7 +23,7 @@ class EstimatorKCF_WDG(sim.sensor.Sensor):
     INFO_NEEDED_FROM_NEIGHBORS: List[str] = ["measurement", "estimate", "noise", "Obs"]
     REQUIRES_GLOBAL_INFO: bool = True
 
-    def __init__(self, all_sensor_ids, adj_matrix, **kwargs):
+    def __init__(self, all_sensor_ids, **kwargs):
 
         super().__init__(**kwargs)
         self.all_sensors = all_sensor_ids  # Global information is required

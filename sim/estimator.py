@@ -1,8 +1,8 @@
 import sim.estimators.template
 import sim.estimators.KCF_2007
 import sim.estimators.ICF_2013
-import sim.estimators.SubIVF
-import sim.estimators.KCF_WDG
+import sim.estimators.OKCF_2017
+import sim.estimators.KCF_WDG_2019
 
 EST_SCHEMES = {
     "KCF": {
@@ -17,15 +17,15 @@ EST_SCHEMES = {
         "class": sim.estimators.ICF_2013.EstimatorICF,
         "params": {"epsilon": 0.25},
     },
-    "SIVF": {
-        "name": "Sub-optimal Innovation Vector Fusion",
-        "short-name": "Sub-optimal IVF",
-        "class": sim.estimators.SubIVF.EstimatorSIVF,
+    "OKCF": {
+        "name": "Optimal Kalman Consensus Filter",
+        "short-name": "Optimal KCF",
+        "class": sim.estimators.OKCF_2017.EstimatorOKCF,
     },
     "KCF-WDG": {
         "name": "Kalman Consensus Filter with Weighted Consensus",
         "short-name": "KCF-WDG",
-        "class": sim.estimators.KCF_WDG.EstimatorKCF_WDG,
+        "class": sim.estimators.KCF_WDG_2019.EstimatorKCF_WDG,
     },
     "No_Scheme": {
         "name": "-N/A-",
