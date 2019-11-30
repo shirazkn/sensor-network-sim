@@ -1,4 +1,7 @@
 numpy
-wxpython
 jupyter
 matplotlib
+scipy
+
+# OPTIONAL : For visualizing graphs
+networkx
