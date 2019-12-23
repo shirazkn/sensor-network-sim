@@ -2,6 +2,7 @@ numpy
 jupyter
 matplotlib
 scipy
+tqdm
 
 # OPTIONAL : For visualizing graphs
 networkx

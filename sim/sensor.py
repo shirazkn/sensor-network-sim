@@ -57,4 +57,7 @@ class Sensor:
         raise sim.errors.InvalidSensorClass("The method do_estimation needs to be defined in inherited class.")
 
     def __getitem__(self, key):
-        return self.__dict__[key]
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        return setattr(self, key, value)

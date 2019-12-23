@@ -6,7 +6,9 @@ class Mailbox:
     Stores and handles messages (to simulate wireless communication between sensors)
     """
     def __init__(self, network):
-
+        """
+        :param network: sim.network.Network() object
+        """
         sensor_ids = network.sensors.keys()
         self.message_dict = {key: None for key in network.SensorClass.INFO_NEEDED_FROM_NEIGHBORS}
         self.messages: Dict[str, dict] = {sensor_id: self.message_dict for sensor_id in sensor_ids}

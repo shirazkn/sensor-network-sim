@@ -1,62 +1,105 @@
 import sim.target
 import sim.network
 import sim.history
+from sim.helpers import line_plot
+from tqdm import tqdm
 
 import numpy as np
+from copy import deepcopy
 
 
-def simulate(input_data, duration=100, est_scheme=None):
-    input_data["scheme"] = est_scheme if est_scheme else input_data["scheme"]
+class Simulation:
+    def __init__(self, input_data, est_schemes, duration):
+        """
+        Each Simulation object has exactly one target, and multiple estimation schemes
+        :param input_data: Output of settings.input.read()
+        :param est_schemes: list of strings
+        """
+        self.input_data = input_data
 
-    target = sim.target.create(input_data)
-    network = sim.network.create(input_data)
-    sim_history = sim.history.create(network)
+        self.target = sim.target.create(input_data)
+        self.networks = [sim.network.create(input_data, es) for es in est_schemes]
+        self.duration = duration
+        self.events = {}
 
-    for t in range(duration):
-        sim_history.add_target(target.x)
+        self.results = {n.est_scheme: {} for n in self.networks}
+        for res, net in zip(self.results.values(), self.networks):
+            res["error_squared"] = {sensor: np.zeros(self.duration, dtype=float) for sensor in net.sensors.keys()}
 
-        network.make_measurements(target.x)
-        network.share_info_with_neighbors()
-        network.get_info_about_target(target)
-        network.do_estimations()
+    def add_event(self, iteration: int, attribute: str, value, sensors: [str] = None):
+        new_event = {"target": {}, "sensors": {}}
+        if not sensors:
+            sensors = self.networks[0].sensors.keys()
 
-        sim_history.add_estimates(network)
-        target.update()
+        for sensor in sensors:
+            new_event["sensors"][sensor] = {attribute: value}
 
-    return sim_history
+        self.events.update({iteration: new_event})
+
+    def check_for_events(self, current_iteration):
+        if current_iteration in self.events.keys():
+            self.apply_event(self.events[current_iteration])
+
+    def apply_event(self, event):
+        for attr, value in event["target"].items():
+            self.target[attr] = value
+
+        for sensor_id, change in event["sensors"].items():
+            for attr, value in change.items():
+                for network in self.networks:
+                    network.sensors[sensor_id][attr] = deepcopy(value)
+
+    def run(self, n_simulations=1):
+        """
+        :param n_simulations: No. of monte-carlo simulations to average over
+        :return: None
+        """
+        print("\n")
+        for sim_number in tqdm(range(n_simulations)):
+            for network in self.networks:
+                network.initialize(self.input_data)
+
+            for time_step in range(self.duration):
+                self.check_for_events(time_step)
+                for network in self.networks:
+                    network.do_iteration(self.target)
+                self.target.update()
+
+            self.update_results(n=sim_number+1)
+
+    def update_results(self, n):
+        for res, net in zip(self.results.values(), self.networks):
+            for sensor in net.sensors.keys():
+                res["error_squared"][sensor] = incremental_mean(res["error_squared"][sensor],
+                                                                net.history.get_error_squared(sensor),
+                                                                n)
+
+    def plot_error_squared(self, sensor, ylim=None):
+        values = []
+        labels = []
+        for name, res in self.results.items():
+            values.append(res["error_squared"][sensor])
+            labels.append(name)
+
+        line_plot(values, range(self.duration),
+                  ylabel="Est. Error Squared", xlabel="Iteration",
+                  title=f"Est. Error Squared of sensor {sensor}",
+                  labels=labels,
+                  ylim=ylim)
+
+    def plot_xy(self, sensor: str):
+        print_line()
+        for n in self.networks:
+            print(f"Estimates of sensor {sensor} using {n.est_scheme} : ")
+            n.history.plot_xy(target=True, estimates_of=sensor)
 
 
-def simulate_many(input_data, duration=100, est_schemes=None, sensor_initials=None):
+def incremental_mean(mean_arr: np.array, new_arr: np.array, n):
+    for i in range(len(mean_arr)):
+        mean_arr[i] = mean_arr[i] + (new_arr[i] - mean_arr[i])/float(n)
 
-    target = sim.target.create(input_data)
-    networks = []
-    simulations = []
+    return mean_arr
 
-    for est_scheme in est_schemes:
-        input_data["scheme"] = est_scheme
-        new_network = sim.network.create(input_data)
-        networks.append(new_network)
-        simulations.append(sim.history.create(new_network))
 
-        if sensor_initials:
-            for sensor in new_network.sensors.values():
-                sensor.ErrCov_prior = np.array(sensor_initials["ErrCov_prior"])
-                sensor.estimate_prior = np.array(sensor_initials["estimate_prior"])
-        new_network.initialize()
-
-    print(f"Simulating for {duration} time-steps...")
-    for t in range(duration):
-        for _sim in simulations:
-            _sim.add_target(target.x)
-
-        for i, network in enumerate(networks):
-            network.make_measurements(target.x)
-            network.share_info_with_neighbors()
-            network.get_info_about_target(target)
-            network.do_estimations()
-            simulations[i].add_estimates(network)
-
-        target.update()
-
-    print("Done. \n ---------------------------- ")
-    return simulations
+def print_line():
+    print("\n------------------------------------\n")

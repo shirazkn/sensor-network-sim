@@ -1,30 +1,34 @@
 ## Sensor Network Simulation (WIP)
-#### For implementing/analyzing consensus-based distributed estimation algorithms
+#### For implementing consensus-based distributed estimation algorithms
 
-- Models target dynamics, sensor measurement & estimation
-- Uses OOP concepts to keep track of flow of information between sensors
-For eg. Each sensor ‘transmits’ and ‘receives’ information to/from its neighbors. The information is processed ‘locally’ via classmethods, mimicking many of the realistic limitations on such sensor networks.
+Click
+[here](https://github.com/shirazkn/sensor-network-sim/blob/master/Simulation.ipynb)
+to see a Jupyter Notebook.
 
-- Allows for easy extension into realistic sensor network limitations such as packet drops, asynchronous update and bandwidth considerations.
+### Overview :
+This code
+- Models target dynamics and sensor measurement models
+- Uses OOP to keep track of flow of information between sensors. For eg.
+  Each sensor ‘transmits’ and ‘receives’ information to/from its
+  neighbors. The information is processed ‘locally’ via classmethods,
+  mimicking many of the realistic limitations on such sensor networks.
 
-- Allows for easy implementation of new estimation algorithms and numerical comparison amongst them by running them concurrently
+- Allows for easy extension into realistic sensor network limitations 
+  such as packet drops, asynchronous update and bandwidth
+  considerations.
 
-#### Here are the instructions to...
-### Install :
-Install Python 3.5+
+- Allows for easy implementation of new estimation algorithms and
+  numerical comparison amongst them by running them concurrently
 
-Install requirements using,
+### Installation :
+To install requirements, run (using Python 3.5+) :
 ```
 pip3 install -r requirements.txt
 ```
-### Run :
-Open Jupyter Notebook using,
-```
-jupyter notebook Simulation.ipynb
-```
 
 ### Other :
-To edit the simulation parameters and target/sensor characteristics, edit the json files in `settings/json-files`.
+To edit the simulation parameters and target/network characteristics,
+edit the json files in `settings/json-files`.
 
 To develop your own estimation algorithm, add a class such as,
 ```

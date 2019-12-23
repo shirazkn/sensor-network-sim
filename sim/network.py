@@ -6,6 +6,7 @@ import sim.estimator
 import sim.mailbox
 import sim.errors
 import sim.helpers
+import sim.history
 from sim.estimator import EST_SCHEMES
 from copy import deepcopy
 
@@ -21,6 +22,7 @@ class Network:
     def __init__(self, estimation_scheme=None):
         # Dict of {sensor_ID : Sensor object}
         self.sensors: Dict[str, sim.sensor.Sensor] = {}
+        self.history = None
 
         if estimation_scheme in EST_SCHEMES:
             self.est_scheme = estimation_scheme
@@ -30,14 +32,19 @@ class Network:
         self.SensorClass, self.sensor_params = sim.estimator.get_estimator(self.est_scheme)
 
         # Messages shared between sensors in the network are put in the 'mailbox'
-        self.mailbox: sim.mailbox.Mailbox
+        self.mailbox: sim.mailbox.Mailbox = None
 
         # Info needed about the target at every time-step
         self.target_info = {key: None for key in self.SensorClass.INFO_NEEDED_FROM_TARGET}
 
-    def initialize(self):
+    def initialize(self, input_data):
+        self.sensors = {}
+        self.create_sensors(input_data["network"])
         for sensor in self.sensors.values():
             sensor.initialize()
+
+        self.mailbox = sim.mailbox.Mailbox(self)
+        self.history = sim.history.create(self.sensors.keys())
 
     def create_sensors(self, data: dict):
         """
@@ -50,10 +57,7 @@ class Network:
 
         # Check if sensor requires global information
         if self.SensorClass.REQUIRES_GLOBAL_INFO:
-            print(f"Warning, the scheme {EST_SCHEMES[self.est_scheme]['short-name']} is not fully distributed.")
             self.sensor_params["all_sensor_ids"] = sensor_ids.copy()
-
-        print(f"Initializing a sensor network with {EST_SCHEMES[self.est_scheme]['short-name']} scheme...")
 
         # Create and add sensors to network
         for index in range(data["n_sensors"]):
@@ -81,6 +85,20 @@ class Network:
         sensor_object = self.SensorClass(sensor_id=id, neighbors=neighbors, obs_matrix=obs_matrix,
                                          noise_cov_matrix=noise_cov_matrix, **kwargs)
         self.sensors[str(id)] = sensor_object
+
+    def do_iteration(self, target):
+        """
+        Does one time-step of estimation
+        """
+        self.history.add_target(target.x)
+
+        # Single time-step of estimation algorithm
+        self.make_measurements(target.x)
+        self.share_info_with_neighbors()
+        self.get_info_about_target(target)
+        self.do_estimations()
+
+        self.history.add_estimates(self.sensors)
 
     def make_measurements(self, target_x):
         """
@@ -120,15 +138,18 @@ class Network:
                 sensor.do_estimation(self.target_info, self.sensors)
 
 
-def create(input_data):
+def create(input_data, est_scheme):
     """
     Creates new Network object based on input data
     """
-    _data = deepcopy(input_data)
-    estimation_scheme = _data["scheme"]
-    network = sim.network.Network(estimation_scheme)
-    network.create_sensors(_data["network"])
-    network.mailbox = sim.mailbox.Mailbox(network)
+    # Check if sensor requires global information
+    if EST_SCHEMES[est_scheme]["class"].REQUIRES_GLOBAL_INFO:
+        print(f"Selected scheme {EST_SCHEMES[est_scheme]['short-name']} (It's not fully-distributed!)")
+    else:
+        print(f"Selected scheme {EST_SCHEMES[est_scheme]['short-name']}")
+
+    network = sim.network.Network(est_scheme)
+    network.create_sensors(input_data["network"])
     return network
 
 
