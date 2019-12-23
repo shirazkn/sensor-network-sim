@@ -5,6 +5,11 @@ Click
 [here](https://github.com/shirazkn/sensor-network-sim/blob/master/Simulation.ipynb)
 to see a Jupyter Notebook.
 
+[Here](https://github.com/shirazkn/sensor-network-sim/blob/master/KCFWDG_CDC2019.pdf)'s
+my presentation at CDC 2019, and 
+[here](https://www.researchgate.net/publication/332529061_Optimal_Kalman_Consensus_Filter_for_Weighted_Directed_Graphs)'s
+the conference paper.
+
 ### Overview :
 This code
 - Models target dynamics and sensor measurement models
