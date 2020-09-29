@@ -2,7 +2,7 @@
 #### For implementing consensus-based distributed estimation algorithms
 
 Click
-[here](https://github.com/shirazkn/sensor-network-sim/blob/master/Simulation.ipynb)
+[here](https://github.com/shirazkn/sensor-network-sim/blob/master/Simulation-Journal.ipynb)
 to see a Jupyter Notebook.
 
 [Here](https://github.com/shirazkn/sensor-network-sim/blob/master/KCFWDG_CDC2019.pdf)'s
