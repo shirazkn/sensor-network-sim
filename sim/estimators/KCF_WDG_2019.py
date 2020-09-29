@@ -28,9 +28,10 @@ class EstimatorKCF_WDG(sim.sensor.Sensor):
         super().__init__(**kwargs)
         self.all_sensors = all_sensor_ids  # Global information is required
 
-        self.estimate_prior = column(np.array([20, 0]))
-        self.ErrCov_prior = 50*np.identity(2)  # For all i, i
-        self.CrossCov_prior = np.zeros([2, 2])  # For all i, j pairs
+        self.x_dim = len(self.estimate)
+        self.estimate_prior = deepcopy(self.estimate)
+        self.ErrCov_prior = deepcopy(self.ErrCov)  # For all i, i
+        self.CrossCov_prior = np.zeros([self.x_dim, self.x_dim])  # For all i, j pairs
 
         # Prior and posterior Cross-covariance matrices, where i = self.id
         self.P = {i_ind: {} for i_ind in all_sensor_ids}
@@ -50,13 +51,13 @@ class EstimatorKCF_WDG(sim.sensor.Sensor):
 
         _i = self.id
         # Consensus gains Cji are stored as C{i: {j: ..., ...}, ...} where j are neighbors of i
-        C_gains = {_id: get_C_gains(_id, all_sensors) for _id in all_sensors.keys()}
+        C_gains = {_id: self.get_C_gains(_id, all_sensors) for _id in all_sensors.keys()}
         # Kalman gains Ki are stored as K{i: ...}
-        K_gains = {_id: get_K_gain(_id, all_sensors, C_gains) for _id in all_sensors.keys()}
+        K_gains = {_id: self.get_K_gain(_id, all_sensors, C_gains) for _id in all_sensors.keys()}
 
         # F := (I - KH)
         F = {_id:
-                 (np.identity(2) - K_gains[_id] @ all_sensors[_id].Obs)
+                 (np.identity(self.x_dim) - K_gains[_id] @ all_sensors[_id].Obs)
              for _id in all_sensors.keys()}
 
         self.estimate = self.estimate_prior + K_gains[self.id] @ (self.measurement - self.Obs @ self.estimate_prior) \
@@ -92,50 +93,48 @@ class EstimatorKCF_WDG(sim.sensor.Sensor):
         self.ErrCov = self.M[_i][_i]
         self.estimate_prior = target_info["A"] @ self.estimate
 
+    def get_C_gains(self, _id, sensors):
+        """
+        Compute consensus gains for a sensor
+        :param _id: ID of sensor with index i ( as in C_ji )
+        :param sensors: All sensors
+        :return: dict: {"neighbor_ID": [numpy.array]}
+        """
+        _i = _id
+        sensor = sensors[_id]
+        _C_gains = {_id: np.zeros([self.x_dim, self.x_dim]) for _id in sensor.neighbors}
 
-def get_C_gains(_id, sensors):
-    """
-    Compute consensus gains for a sensor
-    :param _id: ID of sensor with index i ( as in C_ji )
-    :param sensors: All sensors
-    :return: dict: {"neighbor_ID": [numpy.array]}
-    """
-    _i = _id
-    sensor = sensors[_id]
-    _C_gains = {_id: np.zeros([2, 2]) for _id in sensor.neighbors}
+        # Solve matrix equality (using local information)
+        A = [[np.zeros([self.x_dim, self.x_dim]) for _ in sensor.neighbors] for _ in sensor.neighbors]
+        B = [np.zeros([self.x_dim, self.x_dim]) for _ in sensor.neighbors]
+        Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
 
-    # Solve matrix equality (using local information)
-    A = [[np.zeros([2, 2]) for _ in sensor.neighbors] for _ in sensor.neighbors]
-    B = [np.zeros([2, 2]) for _ in sensor.neighbors]
-    Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
+        for r, _r in enumerate(sensor.neighbors):
+            for s, _s in enumerate(sensor.neighbors):
+                A[s][r] = ((sensor.P[_s][_i] - sensor.P[_i][_i])
+                           @ sensor.Obs.T @ Del_inv @ sensor.Obs
+                           @ (sensor.P[_i][_r] - sensor.P[_i][_i]))
+                A[s][r] -= (sensor.P[_s][_r] - sensor.P[_s][_i] - sensor.P[_i][_r] + sensor.P[_i][_i])
+            B[r] = ((np.identity(self.x_dim) - sensor.P[_i][_i] @ sensor.Obs.T @ Del_inv @ sensor.Obs)
+                    @ (sensor.P[_i][_r] - sensor.P[_i][_i]))
 
-    for r, _r in enumerate(sensor.neighbors):
-        for s, _s in enumerate(sensor.neighbors):
-            A[s][r] = ((sensor.P[_s][_i] - sensor.P[_i][_i])
-                       @ sensor.Obs.T @ Del_inv @ sensor.Obs
-                       @ (sensor.P[_i][_r] - sensor.P[_i][_i]))
-            A[s][r] -= (sensor.P[_s][_r] - sensor.P[_s][_i] - sensor.P[_i][_r] + sensor.P[_i][_i])
-        B[r] = ((np.identity(2) - sensor.P[_i][_i] @ sensor.Obs.T @ Del_inv @ sensor.Obs)
-                @ (sensor.P[_i][_r] - sensor.P[_i][_i]))
+        A_inv = la.pinv(np.block(A))
+        C = (np.block(B) @ A_inv)
 
-    A_inv = la.pinv(np.block(A))
-    C = (np.block(B) @ A_inv)
+        # Separate C into 2x2 matrices
+        for ind, _j in enumerate(sensor.neighbors):
+            _C_gains[_j] = C[0:self.x_dim, ind*self.x_dim:(ind+1)*self.x_dim]
 
-    # Separate C into 2x2 matrices
-    for ind, _j in enumerate(sensor.neighbors):
-        _C_gains[_j] = C[0:2, ind*2:(ind+1)*2]
+        return _C_gains
 
-    return _C_gains
-
-
-def get_K_gain(ID, sensors, C_gains):
-    """
-    Compute Kalman gain for a sensor
-    :param ID: Sensor i
-    :param sensors: Neighbors
-    """
-    _i = ID
-    sensor = sensors[ID]
-    sum_term = sum([C_gains[_i][_r] @ (sensor.P[_r][_i] - sensor.P[_i][_i]) for _r in sensor.neighbors])
-    Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
-    return (sensor.P[sensor.id][sensor.id] + sum_term) @ sensor.Obs.T @ Del_inv
+    def get_K_gain(self, ID, sensors, C_gains):
+        """
+        Compute Kalman gain for a sensor
+        :param ID: Sensor i
+        :param sensors: Neighbors
+        """
+        _i = ID
+        sensor = sensors[ID]
+        sum_term = sum([C_gains[_i][_r] @ (sensor.P[_r][_i] - sensor.P[_i][_i]) for _r in sensor.neighbors])
+        Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
+        return (sensor.P[sensor.id][sensor.id] + sum_term) @ sensor.Obs.T @ Del_inv

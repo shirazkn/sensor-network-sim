@@ -15,6 +15,7 @@ from sim.helpers import column
 import sim.sensor
 import numpy as np
 import numpy.linalg as la
+from copy import deepcopy
 
 
 class EstimatorKCF(sim.sensor.Sensor):
@@ -29,11 +30,8 @@ class EstimatorKCF(sim.sensor.Sensor):
     def __init__(self, epsilon, **kwargs):
 
         super().__init__(**kwargs)
-        self.estimate_prior = column(np.array([100.0, 0.0]))
-        self.ErrCov_prior = np.array(
-            [[1000.0, 0.0],
-             [0.0, 100.0]]
-        )
+        self.estimate_prior = deepcopy(self.estimate)
+        self.ErrCov_prior = deepcopy(self.ErrCov)
         self.K_gain = None
         self.C_gain = {_id: None for _id in self.neighbors}
 
@@ -55,7 +53,7 @@ class EstimatorKCF(sim.sensor.Sensor):
 
         # Calculate Estimate, then propagate prior quantities
         eq_7term_2 = self.K_gain @ (self.measurement - (self.Obs @ self.estimate_prior))
-        eq_7term_3 = column(np.array([0.0, 0.0]))
+        eq_7term_3 = column(np.array([0.0 for _ in range(len(self.estimate))]))
         for i in self.neighbors:
             eq_7term_3 += self.C_gain[i] @ (neighbor_info[i]["estimate_prior"] - self.estimate_prior)
 
@@ -72,7 +70,7 @@ class EstimatorKCF(sim.sensor.Sensor):
             self.C_gain[i] = self.eps * (self.ErrCov_prior / (1 + la.norm(self.ErrCov_prior, 'fro')))
 
     def do_propagation(self, target_info):
-        _F = np.identity(2) - self.K_gain @ self.Obs
+        _F = np.identity(len(self.estimate)) - self.K_gain @ self.Obs
 
         self.ErrCov = (_F @ self.ErrCov_prior @ _F.T) + (self.K_gain @ self.NoiseCov @ self.K_gain.T)
         self.ErrCov_prior = ((target_info["A"] @ self.ErrCov @ target_info["A"].T)

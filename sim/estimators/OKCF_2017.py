@@ -26,10 +26,10 @@ class EstimatorOKCF(sim.sensor.Sensor):
 
         super().__init__(**kwargs)
         self.all_sensors = all_sensor_ids  # Global information is required
-
-        self.estimate_prior = column(np.array([20, 0]))
-        self.ErrCov_prior = 50*np.identity(2)  # For all i, i
-        self.CrossCov_prior = np.zeros([2, 2])  # For all i, j pairs
+        self.x_dim = len(self.estimate)
+        self.estimate_prior = deepcopy(self.estimate)
+        self.ErrCov_prior = deepcopy(self.ErrCov)
+        self.CrossCov_prior = np.zeros([self.x_dim, self.x_dim])  # For all i, j pairs
 
         # Prior and posterior Cross-covariance matrices, where i = self.id
         self.P = {i_ind: {} for i_ind in all_sensor_ids}
@@ -48,11 +48,11 @@ class EstimatorOKCF(sim.sensor.Sensor):
         """
 
         _i = self.id
-        C_gains = {_id: get_C_gain(_id, sensor) for _id, sensor in all_sensors.items()}
-        K_gains = {_id: get_K_gain(_id, all_sensors, C_gains[_id]) for _id in all_sensors.keys()}
+        C_gains = {_id: self.get_C_gain(_id, sensor) for _id, sensor in all_sensors.items()}
+        K_gains = {_id: self.get_K_gain(_id, all_sensors, C_gains[_id]) for _id in all_sensors.keys()}
 
         # F := (I - KH)
-        F = {_id: (np.identity(2) - K_gains[_id] @ all_sensors[_id].Obs) for _id in all_sensors.keys()}
+        F = {_id: (np.identity(self.x_dim) - K_gains[_id] @ all_sensors[_id].Obs) for _id in all_sensors.keys()}
 
         self.estimate = self.estimate_prior \
                         + K_gains[self.id] @ (self.measurement - self.Obs @ self.estimate_prior) \
@@ -88,37 +88,35 @@ class EstimatorOKCF(sim.sensor.Sensor):
         self.ErrCov = self.M[_i][_i]
         self.estimate_prior = target_info["A"] @ self.estimate
 
+    def get_C_gain(self, _i, sensor):
+        """
+        Compute consensus gain for a sensor
+        :param _i: ID of sensor
+        :param sensor: Sensor object
+        :return: numpy.array
+        """
+        Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
+        D = np.zeros([self.x_dim, self.x_dim])
+        L = np.zeros([self.x_dim, self.x_dim])
+        for _r in sensor.neighbors:
+            for _s in sensor.neighbors:
+                D += sensor.P[_r][_s] - sensor.P[_r][_i] - sensor.P[_i][_s] + sensor.P[_i][_i]
+            L += sensor.P[_r][_i] - sensor.P[_i][_i]
 
-def get_C_gain(_i, sensor):
-    """
-    Compute consensus gain for a sensor
-    :param _i: ID of sensor
-    :param sensor: Sensor object
-    :return: numpy.array
-    """
-    Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
-    D = np.zeros([2, 2])
-    L = np.zeros([2, 2])
-    for _r in sensor.neighbors:
-        for _s in sensor.neighbors:
-            D += sensor.P[_r][_s] - sensor.P[_r][_i] - sensor.P[_i][_s] - sensor.P[_i][_i]
-        L += sensor.P[_r][_i] - sensor.P[_i][_i]
+        G = D - L @ sensor.Obs.T @ Del_inv @ sensor.Obs @ L.T
+        return (sensor.P[_i][_i] @ sensor.Obs.T @ Del_inv @ sensor.Obs - np.identity(self.x_dim)) @ L.T @ la.pinv(G)
 
-    G = D - L @ sensor.Obs.T @ Del_inv @ sensor.Obs @ la.pinv(L)
-    return (sensor.P[_i][_i] @ sensor.Obs.T @ Del_inv @ sensor.Obs - np.identity(2)) @ L.T @ la.pinv(G)
+    def get_K_gain(self, _i, sensors, C_gain):
+        """
+        Compute Kalman gain for a sensor
+        :param _i: Sensor i
+        :param sensors: Neighbors
+        :param C_gain: Consensus gain of sensor i
+        """
+        sensor = sensors[_i]
+        Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
+        L = np.zeros([self.x_dim, self.x_dim])
+        for _r in sensor.neighbors:
+            L += sensor.P[_r][_i] - sensor.P[_i][_i]
 
-
-def get_K_gain(_i, sensors, C_gain):
-    """
-    Compute Kalman gain for a sensor
-    :param _i: Sensor i
-    :param sensors: Neighbors
-    :param C_gain: Consensus gain of sensor i
-    """
-    sensor = sensors[_i]
-    Del_inv = la.pinv(sensor.NoiseCov + sensor.Obs @ sensor.P[_i][_i] @ sensor.Obs.T)
-    L = np.zeros([2, 2])
-    for _r in sensor.neighbors:
-        L += sensor.P[_r][_i] - sensor.P[_i][_i]
-
-    return (sensor.P[sensor.id][sensor.id] + C_gain @ L) @ sensor.Obs.T @ Del_inv
+        return (sensor.P[sensor.id][sensor.id] + C_gain @ L) @ sensor.Obs.T @ Del_inv

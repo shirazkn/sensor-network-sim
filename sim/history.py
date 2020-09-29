@@ -34,7 +34,8 @@ class History:
             self.sensors[id]["z_1"].append(sensor.measurement[1])
             self.sensors[id]["ErrCov"].append(sensor.ErrCov)
 
-    def plot_xy(self, target=True, estimates_of: str = None, measurements_of: str = None):
+    def plot_xy(self, target=True, estimates_of: str = None,
+                measurements_of: str = None, legend_loc: str = 'upper right'):
         plt.rcParams["figure.figsize"] = FIGURE_SIZE
         plt.gca().set_aspect('equal', adjustable='box')
 
@@ -51,7 +52,7 @@ class History:
 
         plt.xlabel("x")
         plt.ylabel("y")
-        plt.legend(loc='upper right')
+        plt.legend(loc=legend_loc)
         plt.show()
 
     def get_error_squared(self, s: str = None):
