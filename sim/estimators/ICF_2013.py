@@ -28,11 +28,6 @@ class EstimatorICF(sim.sensor.Sensor):
     def __init__(self, epsilon, **kwargs):
 
         super().__init__(**kwargs)
-        self.estimate_prior = column(np.array([20, 0]))
-        self.ErrCov_prior = np.array(
-            [[1.0, 0.0],
-             [0.0, 1.0]]
-        )
         self.v = None
         self.V = None
 

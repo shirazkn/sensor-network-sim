@@ -23,6 +23,9 @@ class Target:
     def __getitem__(self, key):
         return self.__dict__[key]
 
+    def __setitem__(self, key, value):
+        return setattr(self, key, value)
+
 
 def create(input_data):
     """

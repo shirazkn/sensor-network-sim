@@ -7,13 +7,13 @@ import sim.estimators.KCF_WDG_2019
 EST_SCHEMES = {
     "KCF": {
         "name": "Kalman Consensus Filter",
-        "short-name": "KCF (2009)",
+        "short-name": "KCF",
         "class": sim.estimators.KCF_2007.EstimatorKCF,
         "params": {"epsilon": 0.25},
     },
     "ICF": {
         "name": "Information Consensus Filter",
-        "short-name": "ICF (2013)",
+        "short-name": "ICF",
         "class": sim.estimators.ICF_2013.EstimatorICF,
         "params": {"epsilon": 0.25},
     },
@@ -24,7 +24,7 @@ EST_SCHEMES = {
     },
     "KCF-WDG": {
         "name": "Kalman Consensus Filter with Weighted Consensus",
-        "short-name": "KCF-WDG",
+        "short-name": "OKCF-WDG",
         "class": sim.estimators.KCF_WDG_2019.EstimatorKCF_WDG,
     },
     "No_Scheme": {

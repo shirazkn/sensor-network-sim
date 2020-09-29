@@ -6,7 +6,7 @@ import numpy as np
 import sim.noise
 import sim.errors
 
-from sim.helpers import column
+from sim.helpers import column, nones, nones_matrix
 from typing import List, Dict
 
 
@@ -21,6 +21,8 @@ class Sensor:
     REQUIRES_GLOBAL_INFO: bool = False
 
     def __init__(self, sensor_id, neighbors, obs_matrix, noise_cov_matrix):
+        target_dim = len(obs_matrix[0])
+        measurement_dim = len(obs_matrix)
 
         # (Local) topology information
         self.id: str = sensor_id
@@ -30,15 +32,12 @@ class Sensor:
         self.Obs: np.array = np.array(obs_matrix)
         self.NoiseCov: np.array = np.array(noise_cov_matrix)
 
-        self.measurement: np.array = column(np.array([None, None]))
+        self.measurement: np.array = column(nones(measurement_dim))
         self.noise = sim.noise.Noise(self.NoiseCov)
 
         # Matrices and Vectors corresponding to estimation
-        self.estimate: np.array = column(np.array([None, None]))
-        self.ErrCov: np.array = np.array([
-            [None, None],
-            [None, None]]
-        )
+        self.estimate: np.array = column(nones(target_dim))
+        self.ErrCov: np.array = nones_matrix(target_dim, target_dim)
 
     def initialize(self):
         """
